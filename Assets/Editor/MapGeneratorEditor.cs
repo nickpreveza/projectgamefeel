@@ -10,17 +10,21 @@ public class MapGeneratorEditor : Editor
     {
         MapGenerator mapGen = (MapGenerator)target;
 
-        if (DrawDefaultInspector())
-        {
-            if (mapGen.autoUpdate)
-            {
-                mapGen.GenerateMap();
-            }
-        }
+        DrawDefaultInspector();
 
         if (GUILayout.Button("Generate"))
         {
             mapGen.GenerateMap();
+        }
+
+        if (GUILayout.Button("Clear"))
+        {
+            mapGen.ClearMap();
+        }
+
+        if (GUILayout.Button("Debug Noisemap"))
+        {
+            mapGen.DebugDrawNoiseMap();
         }
     }
 }

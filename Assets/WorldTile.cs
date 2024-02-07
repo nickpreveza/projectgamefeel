@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class WorldTile : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public int posX;
+    public int postY;
+    public float debugHeight;
 
-    // Update is called once per frame
-    void Update()
+    public SpriteRenderer baseSprite;
+
+    public void SetData(int x, int y, Color newColor, float elv)
     {
-        
+        debugHeight = elv;
+
+        this.name = "Tile:" + x + "," + y;
+        posX = x;
+        postY = y;
+        this.transform.position = new Vector2(x, y);
+        baseSprite.color = newColor;
     }
 }

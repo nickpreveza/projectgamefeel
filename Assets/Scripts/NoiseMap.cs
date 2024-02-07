@@ -18,8 +18,6 @@ public static class Noise
             octaveOffset[i] = new Vector2(offsetX, offsetY);
         }
 
-       
-
         if (scale <= 0)
         {
             scale = 0.0001f;

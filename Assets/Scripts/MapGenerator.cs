@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class MapGenerator : MonoBehaviour
 {
+    public static MapGenerator Instance;
+
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
@@ -22,12 +25,19 @@ public class MapGenerator : MonoBehaviour
 
     public GameObject tilePrefab;
 
-    public bool autoUpdate;
+    public bool useFalloff;
 
     public TerrainType[] regions;
 
-    Color[,] colorMap;
-    float[,] noiseMap;
+    public Transform tileParent;
+
+    public GameObject[,] worldTileGameObject;
+    public WorldTile[,] worldTiles;
+    public Color[,] colorMap;
+    public float[,] noiseMap;
+    public float[,] falloffMap;
+
+    [SerializeField] Renderer textureRender;
 
     private void OnValidate()
     {
@@ -51,15 +61,55 @@ public class MapGenerator : MonoBehaviour
             octaves = 0;
         }
     }
-    public void GenerateMap()
+
+    public void ClearMap()
+    {
+        foreach(Transform obj in tileParent)
+        {
+            DestroyImmediate(obj.gameObject);
+        }
+    }
+
+    public void DebugDrawNoiseMap()
     {
         noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistnace, lacunarity, offset);
-        colorMap = new Color[mapWidth, mapHeight];
+        Texture2D texture = new Texture2D(noiseMap.GetLength(0), noiseMap.GetLength(1));
+
+        Color[] colorMap = new Color[mapHeight * mapWidth];
 
         for (int y = 0; y < mapHeight; y++)
         {
             for (int x = 0; x < mapWidth; x++)
             {
+                colorMap[y * mapWidth + x] = Color.Lerp(Color.black, Color.white, noiseMap[x,y]);
+
+            }
+        }
+
+        texture.SetPixels(colorMap);
+        texture.Apply();
+
+        textureRender.sharedMaterial.mainTexture = texture;
+        textureRender.transform.localPosition = new Vector3(mapWidth, 1, mapHeight);
+
+    }
+    public void GenerateMap()
+    {
+        noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistnace, lacunarity, offset);
+        colorMap = new Color[mapWidth, mapHeight];
+        worldTileGameObject = new GameObject[mapWidth, mapHeight];
+        worldTiles = new WorldTile[mapWidth, mapHeight];
+        falloffMap = FalloffGenerator.GenerateFalloffMap(mapWidth);
+
+        for (int y = 0; y < mapHeight; y++)
+        {
+            for (int x = 0; x < mapWidth; x++)
+            {
+                if (useFalloff)
+                {
+                    noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
+                }
+
                 float currentHeight = noiseMap[x, y];
               
                 for (int i = 0; i <regions.Length; i++)
@@ -72,6 +122,17 @@ public class MapGenerator : MonoBehaviour
                         break;
                     }                
                 }
+
+              
+
+                GameObject newTile = Instantiate(tilePrefab, tileParent);
+
+                worldTileGameObject[x, y] = newTile;
+                worldTiles[x, y] = newTile.GetComponent<WorldTile>();
+               
+                worldTiles[x, y].SetData(x, y, colorMap[x, y], currentHeight);
+
+
             }
         }
     }
