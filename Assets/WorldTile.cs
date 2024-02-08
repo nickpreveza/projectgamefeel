@@ -5,19 +5,31 @@ using UnityEngine;
 public class WorldTile : MonoBehaviour
 {
     public int posX;
-    public int postY;
-    public float debugHeight;
+    public int posY;
+    public float elevation;
+    public TileType type;
 
     public SpriteRenderer baseSprite;
 
-    public void SetData(int x, int y, Color newColor, float elv)
-    {
-        debugHeight = elv;
+    public List<WorldTile> adjacent = new List<WorldTile>();
+    public List<WorldTile> walkableAdjacent = new List<WorldTile>();
 
+    public void SetData(int x, int y, Color newColor, float _elevation, TileType _type)
+    {
+        elevation = _elevation;
+        type = _type;
         this.name = "Tile:" + x + "," + y;
         posX = x;
-        postY = y;
+        posY = y;
         this.transform.position = new Vector2(x, y);
         baseSprite.color = newColor;
     }
+
+   
+}
+
+public enum TileType
+{
+    WATER,
+    LAND
 }
