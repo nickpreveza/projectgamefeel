@@ -26,5 +26,9 @@ public class MapGeneratorEditor : Editor
         {
             mapGen.DebugDrawNoiseMap();
         }
+        if (GUILayout.Button("Update Colors"))
+        {
+            mapGen.UpdateColors();
+        }
     }
 }

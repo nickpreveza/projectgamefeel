@@ -8,6 +8,8 @@ TagManager:
   - Music
   - Background
   - NoMask
+  - Tile
+  - City
   layers:
   - Default
   - TransparentFX
@@ -15,8 +17,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - Post
+  - City
   - Platforms
   - Player
   - Volumes
@@ -38,8 +40,8 @@ TagManager:
   - MidHeightOneWayPlatforms
   - Pushables
   - Stairs
-  - 
-  - 
+  - Interactables
+  - Units
   - 
   m_SortingLayers:
   - name: Background

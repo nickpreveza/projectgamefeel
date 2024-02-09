@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class CityView : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+    public WorldCity selectedCity;
+    [SerializeField] GameObject cityParent;
+    //barracks
+    //tavern
+    //forge
+    public void ShowCity()
     {
-        
+        cityParent.SetActive(true);
+    }
+    public void HideCity()
+    {
+        cityParent.SetActive(false);
     }
 }

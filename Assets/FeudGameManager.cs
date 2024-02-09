@@ -4,15 +4,52 @@ using UnityEngine;
 
 public class FeudGameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static FeudGameManager Instance;
+    public GameObject playerPrefab;
+    public bool cityVisible;
+    [SerializeField] CivilizationScriptable[] civilizations;
+    [SerializeField] CityView cityManager;
+    void Awake()
     {
-        
+        Instance = this;   
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        MapGenerator.Instance.ClearMap(false);
+        MapGenerator.Instance.GenerateMap();
+        SI_CameraController.Instance.GameStarted();
+        SI_UIManager.Instance.LoadingPanel(false);
+    }
+
+    private void Update()
+    {
+        if (cityVisible)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                ViewCity(false);
+            }
+        }
+    }
+
+    public void CreatePlayer(WorldTile startingCity)
+    {
+
+    }
+
+    public void ViewCity(bool show, WorldTile city = null)
+    {
+        cityVisible = show;
+        if (cityVisible)
+        {
+            SI_CameraController.Instance.ShowCity(city.cityObject.GetComponent<WorldCity>());
+            cityManager.ShowCity();
+        }
+        else
+        {
+            SI_CameraController.Instance.HideCity();
+            cityManager.HideCity();
+        }
     }
 }

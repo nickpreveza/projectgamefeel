@@ -11,6 +11,9 @@ public class MapGenerator : MonoBehaviour
     public int mapHeight;
     public float noiseScale;
     public float cellSize = 1;
+    public int citiesToGenerate;
+
+    List<string> availableCityNames = new List<string>();
 
     public int octaves;
     [Range(0,1)]
@@ -25,6 +28,7 @@ public class MapGenerator : MonoBehaviour
     public Vector2 offset;
 
     public GameObject tilePrefab;
+    public GameObject cityPrefab;
 
     public bool useFalloff;
 
@@ -41,9 +45,10 @@ public class MapGenerator : MonoBehaviour
 
     [SerializeField] Renderer textureRender;
 
-    public WorldTile[] tilesAvailableForCities;
+    public List<WorldTile> tilesAvailableForCities = new List<WorldTile>();
     public WorldTile[] walkableTiles;
 
+    public List<WorldTile> worldCities = new List<WorldTile>();
     private void OnValidate()
     {
         if (mapWidth < 1)
@@ -73,21 +78,16 @@ public class MapGenerator : MonoBehaviour
     }
     public void ClearMap(bool isEditor)
     {
-        while (transform.childCount > 0)
+        while (tileParent.childCount > 0)
         {
-            DestroyImmediate(transform.GetChild(0).gameObject);
+            DestroyImmediate(tileParent.GetChild(0).gameObject);
         }
-    }
 
-    private void Start()
-    {
-        ClearMap(false);
-        GenerateMap();
     }
 
     public void DebugDrawNoiseMap()
     {
-        noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistnace, lacunarity, offset);
+        noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, cellSize, seed, noiseScale, octaves, persistnace, lacunarity, offset);
         Texture2D texture = new Texture2D(noiseMap.GetLength(0), noiseMap.GetLength(1));
 
         Color[] colorMap = new Color[mapHeight * mapWidth];
@@ -125,17 +125,20 @@ public class MapGenerator : MonoBehaviour
 
     void GetXY(Vector3 worldPosition, out int x, out int y)
     {
-        x = Mathf.FloorToInt(worldPosition.x / cellSize);
-        y = Mathf.FloorToInt(worldPosition.y / cellSize);
+        x = Mathf.FloorToInt(worldPosition.x / 1) + 1;
+        y = Mathf.FloorToInt(worldPosition.y / 1) + 1;
     }
     public void GenerateMap()
     {
-        noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistnace, lacunarity, offset);
+        ClearMap(false);
+
+        noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, cellSize, seed, noiseScale, octaves, persistnace, lacunarity, offset);
         colorMap = new Color[mapWidth, mapHeight];
         regionMap = new TerrainType[mapWidth, mapHeight];
         worldTileGameObject = new GameObject[mapWidth, mapHeight];
         worldTiles = new WorldTile[mapWidth, mapHeight];
         falloffMap = FalloffGenerator.GenerateFalloffMap(mapWidth);
+        tilesAvailableForCities = new List<WorldTile>();
 
         for (int y = 0; y < mapHeight; y++)
         {
@@ -165,20 +168,123 @@ public class MapGenerator : MonoBehaviour
                 worldTileGameObject[x, y] = newTile;
                 worldTiles[x, y] = newTile.GetComponent<WorldTile>();
                
-                worldTiles[x, y].SetData(x, y, colorMap[x, y], currentHeight, regionMap[x, y].type);
+                worldTiles[x, y].SetData(x, y, colorMap[x, y], currentHeight, cellSize, regionMap[x, y].type, regionMap[x, y]);
+                worldTiles[x, y].type = regionMap[x, y].type;
+
+                if (worldTiles[x,y].type == TileType.LAND)
+                {
+                    tilesAvailableForCities.Add(worldTiles[x, y]);
+                }
+
+                //Debug.DrawLine(GetWorldPosition)
             }
         }
 
         FindAdjacentTiles(); //second pass to find adjacent tiles 
         GenerateCities();
+        SpawnPlayer();
+    }
+
+    //this goes to game manager
+    void SpawnPlayer()
+    {
+        int randomCityFound = Random.Range(0, worldCities.Count);
+        FeudGameManager.Instance.CreatePlayer(worldCities[randomCityFound]);
+
     }
 
     public void GenerateCities()
     {
         int citiesSpawned = 0;
         Random.InitState(seed);
-        List<WorldTile> hexesInRadius = new List<WorldTile>();
+        List<WorldTile> tilesInRadius = new List<WorldTile>();
+
+        List<WorldTile> tilesToFilterOut = new List<WorldTile>();
+
+        for(int i = 0; i < tilesAvailableForCities.Count; i++)
+        {
+            List<WorldTile> markedForRemoval = new List<WorldTile>();
+            int waterAdjCount = 0;
+
+            foreach (WorldTile tileToCheck in tilesAvailableForCities[i].adjacent)
+            {
+                
+                if (tileToCheck.type == TileType.WATER)
+                {
+                    waterAdjCount++;
+
+                    if (waterAdjCount > 3)
+                    {
+                        markedForRemoval.Add(tilesAvailableForCities[i]);
+                        continue;
+                    }
+                    Direction hexDirection = GetHexDirection(tilesAvailableForCities[i], tileToCheck);
+                    if (hexDirection == Direction.Right || hexDirection == Direction.Up || hexDirection == Direction.RightUp)
+                    {
+                        markedForRemoval.Add(tilesAvailableForCities[i]);
+                        continue;
+                    }
+                }
+              
+            }
+        }
+
+        foreach(WorldTile tile in tilesToFilterOut)
+        {
+            if (tilesAvailableForCities.Contains(tile))
+            {
+                tilesAvailableForCities.Remove(tile);
+            }
+        }
+
+        for(int i = 0; i < citiesToGenerate; i++)
+        {
+            if (tilesAvailableForCities.Count <= 0)
+            {
+                Debug.LogWarning("No more available spaces where found for citis");
+                break;
+            }
+
+            int randomTileIndex = Random.Range(0, tilesAvailableForCities.Count);
+            WorldTile newCityTile = tilesAvailableForCities[randomTileIndex];
+            string cityName = "defaultCity";
+
+            if (availableCityNames.Count > 0)
+            {
+                int randomIndex = Random.Range(0, availableCityNames.Count);
+                cityName = availableCityNames[randomIndex];
+                availableCityNames.RemoveAt(randomIndex);
+            }
+
+            newCityTile.SpawnCity(cityName, cityPrefab);
+            worldCities.Add(newCityTile);
+            citiesSpawned++;
+
+            newCityTile.baseSprite.color = Color.white;
+            foreach(WorldTile tile in GetTileListWithinRadius(newCityTile, 1))
+            {
+                tile.cityObject = newCityTile.cityObject;
+                tile.baseSprite.color = Color.white;
+            }
+
+            tilesInRadius = GetTileListWithinRadius(newCityTile, 5);
+
+            foreach (WorldTile tile in tilesInRadius)
+            {
+                if (tilesAvailableForCities.Contains(tile))
+                {
+                    tilesAvailableForCities.Remove(tile);
+                }
+            }
+        }
+
+        List<WorldTile> worldCitiesToAssign = new List<WorldTile>(worldCities);
+
+        //foreach civ, give them approximately the same number of cities 
+        //then for each of those civs, arrange the cities to villages, forts and castles 
+
     }
+
     public void FindAdjacentTiles()
     {
         for (int y = 0; y < mapHeight; y++)
@@ -186,52 +292,39 @@ public class MapGenerator : MonoBehaviour
             for (int x = 0; x < mapWidth; x++)
             {
                 WorldTile tile = worldTiles[x, y];
-                List<WorldTile> tilesToAdd = GetHexesListWithinRadius(tile, 1);
+                List<WorldTile> tilesToAdd = GetTileListWithinRadius(tile, 1);
                 if (tilesToAdd.Contains(tile)) //leftover safety check, shouldn't be needed
                 {
                     tilesToAdd.Remove(tile);
                 }
 
-                tile.adjacent = tilesToAdd;
-                tile.walkableAdjacent = tilesToAdd;
-
-                List<WorldTile> adjTilesToRemove = new List<WorldTile>();
-                foreach(WorldTile adjTile in tile.walkableAdjacent)
-                {
-                    if (adjTile.type != TileType.LAND)
-                    {
-                        adjTilesToRemove.Add(adjTile);
-                        
-                    }
-                }
-
-                for(int i = 0; i < adjTilesToRemove.Count; i++)
-                {
-                    if (tile.walkableAdjacent.Contains(adjTilesToRemove[i]))
-                    {
-                        tile.walkableAdjacent.Remove(adjTilesToRemove[i]);
-                    }
-                }
+                tile.adjacent = new List<WorldTile>(tilesToAdd);
 
                 //you might want to filter out the unwanted tiles here for city placement 
             }
         }
     }
 
-    public void FindAdjacentWalkable()
-    {
-
-    }
-
-    public List<WorldTile> GetHexesListWithinRadius(WorldTile centerTile, int range)
+    public List<WorldTile> GetTileListWithinRadius(WorldTile centerTile, int range)
     {
         List<WorldTile> adjacentTiles = new List<WorldTile>();
 
-        int[] dx = { 0, 1, 0, -1 }; // Change in x-coordinate
-        int[] dy = { -1, 0, 1, 0 }; // Change in y-coordinate
+       // int[] dx = { 0, 1, 0, -1 }; // Change in x-coordinate
+        //int[] dy = { -1, 0, 1, 0 }; // Change in y-coordinate
 
+        for (int dx = -range; dx <= range; dx++)
+        {
+            for (int dy = -range; dy <= range; dy++)
+            {
+                if (dx + centerTile.posX >= 0 && dx + centerTile.posX < mapWidth && dy + centerTile.posY >= 0 && dy + centerTile.posY < mapHeight)
+                {
+                    adjacentTiles.Add(worldTiles[dx + centerTile.posX, dy + centerTile.posY]);
+                }
+            }
+        }
+        /*
         // Loop through each possible adjacent tile
-        for (int i = 0; i < dx.Length; i++)
+        for (int i = 0 ; i < dx.Length; i++)
         {
             int newX = centerTile.posX + dx[i];
             int newY = centerTile.posY + dy[i];
@@ -242,46 +335,98 @@ public class MapGenerator : MonoBehaviour
                 // If within bounds, add the value of the adjacent tile to the list
                 adjacentTiles.Add(worldTiles[newX, newY]);
             }
-        }
+        }*/
 
         return adjacentTiles;
     }
 
-    public Direction GetHexDirection(WorldTile tileOrigin, WorldTile tileTarget)
+    public Direction GetHexDirection(WorldTile origin, WorldTile target)
     {
-        if (tileOrigin.posX == tileTarget.posX)
+        if (origin.posX == target.posX)
         {
-            if (tileTarget.posY > tileOrigin.posY)
+            if (target.posY > origin.posY)
             {
-                return Direction.RightUp;
+                return Direction.Up;
             }
-            else if (tileTarget.posY < tileOrigin.posY)
+            else if (target.posY < origin.posY)
             {
-                return Direction.LeftDown;
+                return Direction.Down;
             }
         }
-        else if (tileOrigin.posY == tileTarget.posY)
+        else if (origin.posY == target.posY)
         {
-            if (tileTarget.posX > tileOrigin.posX)
+            if (target.posX > origin.posX)
             {
                 return Direction.Right;
             }
-            else if (tileTarget.posX < tileOrigin.posX)
+            else if (target.posX < origin.posX)
             {
                 return Direction.Left;
             }
         }
-        else if (tileOrigin.posY < tileTarget.posY && tileOrigin.posX > tileTarget.posX)
+        else if (target.posX > origin.posX && target.posY > origin.posY)
+        {
+            return Direction.RightUp;
+        }
+        else if (target.posX < origin.posX && target.posY > origin.posY)
         {
             return Direction.LeftUp;
         }
-        else if (tileOrigin.posX < tileTarget.posX && tileOrigin.posY > tileTarget.posY)
+        else if (target.posX > origin.posX && target.posY < origin.posY)
         {
             return Direction.RightDown;
         }
+        else if (target.posX < origin.posX && target.posY < origin.posY)
+        {
+            return Direction.LeftDown;
+        }
+     
 
         return Direction.Right;
     }
+
+    public void UpdateColors()
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+            for (int x = 0; x < mapWidth; x++)
+            {
+                if (worldTiles[x, y].cityObject == null)
+                worldTiles[x, y].baseSprite.color = regionMap[x, y].colour;
+            }
+        }
+    }
+
+    public string[] cityNames = new string[] {
+    "Bamery",
+    "Ochepsa",
+    "Edosgend",
+    "Pihsea",
+    "Vleuver",
+    "Osrery",
+    "Yhok",
+    "Hurg",
+    "Acomond",
+    "Ocksas",
+    "Crietsa",
+    "Yreford",
+    "Krehledo",
+    "Vruelwell",
+    "Keburn",
+    "Oprey",
+    "Grose",
+    "Sheley",
+    "Odonsea",
+    "Ingate",
+     "Crevale",
+     "Zremont",
+     "Floshire",
+     "Stigow",
+     "Lapus",
+     "Clurgh",
+     "Cront",
+     "Outinsburgh",
+     "Adenagow"};
 }
 
 [System.Serializable]
@@ -295,11 +440,22 @@ public struct TerrainType
 
 public enum Direction
 {
-    RightUp,
+    Up,
+    Down,
     Right,
-    RightDown,
-    LeftDown,
     Left,
-    LeftUp
+
+    RightUp,
+    RightDown,
+    LeftUp,
+    LeftDown
+}
+
+public enum CivilizationType
+{
+    RED,
+    PURPLE,
+    YELLOW,
+    BLACK
 }
 

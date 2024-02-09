@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04e8d83b4aec6454487bd89ae18ba54b, type: 3}
+  m_Name: Civilization
+  m_EditorClassIdentifier: 
+  civName: Georgi
+  icon: {fileID: 21300008, guid: fa6d364a5a0575245859952062aea14b, type: 3}
+  color: {r: 0.8490566, g: 0.69841874, b: 0.0040049935, a: 1}
+  citySprites:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  weapons:
+  - id: 
+    icon: {fileID: 0}
+    level: 0
+    attackSpeed: 0
+  units:
+  - id: 
+    icon: {fileID: 0}
+    level: 0
+    movementSpeed: 0

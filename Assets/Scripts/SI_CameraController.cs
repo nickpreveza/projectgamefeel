@@ -2,15 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
+using Cinemachine;
 public class SI_CameraController : MonoBehaviour
 {
     public static SI_CameraController Instance;
     public bool gameReady;
     public bool controlsLocked;
 
-    Camera mainCamera;
-    Camera playerCamera;
+    [SerializeField] Camera mainCamera;
+
+    [SerializeField] CinemachineVirtualCamera worldViewVirtualCamera;
+    [SerializeField] CinemachineVirtualCamera cityViewTransitionVirtualCamera;
+    [SerializeField] CinemachineVirtualCamera cityViewVirtualCamera;
 
     [SerializeField] bool outOfBounds;
 
@@ -61,6 +64,9 @@ public class SI_CameraController : MonoBehaviour
     float newX, newY;
     Vector3 clampedPosition;
 
+    [SerializeField]
+    float transitionZoomOffsetX, transitionZoomOffsetY;
+
     //hex panning
     [SerializeField] Vector3 cameraOffsetFromPanTarget;
     Vector3 prevCameraPosition;
@@ -79,10 +85,12 @@ public class SI_CameraController : MonoBehaviour
 
     public LayerMask menuLayerMask;
     public LayerMask gameLayerMask;
+    public LayerMask cityLayerMask;
     public bool animationsRunning;
 
     bool IsMouseOverGameWindow { get { return !(0 > Input.mousePosition.x || 0 > Input.mousePosition.y || Screen.width < Input.mousePosition.x || Screen.height < Input.mousePosition.y); } }
 
+    public float cameraToCityViewDelay = 1f;
 
     void Awake()
     {
@@ -96,24 +104,52 @@ public class SI_CameraController : MonoBehaviour
         }
 
         oldPosition = this.transform.position;
-        mainCamera = transform.GetChild(0).GetComponent<Camera>();
-        playerCamera = transform.GetChild(0).GetChild(0).GetComponent<Camera>();
-        
-        //call this from gamemanager
-        GameStarted();
+       
     }
 
     public void GameStarted()
     {
         mainCamera.cullingMask = gameLayerMask;
-        playerCamera.gameObject.SetActive(true);
+        worldViewVirtualCamera.gameObject.SetActive(true);
+        cityViewTransitionVirtualCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(false);
         Update_CurrentFunction = Update_DetectModeStart;
     }
 
     public void GameEnded()
     {
-        mainCamera.cullingMask = menuLayerMask;
-        playerCamera.gameObject.SetActive(false);
+//mainCamera.cullingMask = menuLayerMask;
+        //cityCamera.gameObject.SetActive(false);
+    }
+
+    public void ShowCity(WorldCity city)
+    {
+        controlsLocked = true;
+        Vector3 prevPos = cityViewTransitionVirtualCamera.gameObject.transform.position;
+        prevPos.x = city.parentTile.posX + transitionZoomOffsetX;
+        prevPos.y = city.parentTile.posY + transitionZoomOffsetY;
+        cityViewTransitionVirtualCamera.gameObject.transform.position = prevPos;
+        worldViewVirtualCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(false);
+
+        cityViewTransitionVirtualCamera.gameObject.SetActive(true);
+        Invoke("EnableRealCityCamera", cameraToCityViewDelay);
+    }
+
+    void EnableRealCityCamera()
+    {
+        cityViewTransitionVirtualCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(true);
+        mainCamera.cullingMask = cityLayerMask;
+    }
+
+    public void HideCity()
+    {
+        controlsLocked = false;
+        cityViewTransitionVirtualCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(false);
+        worldViewVirtualCamera.gameObject.SetActive(true);
+        mainCamera.cullingMask = gameLayerMask;
     }
   
     private void Update()
@@ -153,7 +189,7 @@ public class SI_CameraController : MonoBehaviour
 
         Update_CurrentFunction();
 
-        if (!IsPointerOverUIObject())
+        if (!IsPointerOverUIObject() )
         {
             
 
@@ -164,12 +200,12 @@ public class SI_CameraController : MonoBehaviour
 
         }
 
-        if (keyboardControls)
+        if (keyboardControls && !animationsRunning)
         {
             KeyboardInput();
         }
 
-        if (touchControls)
+        if (touchControls && !animationsRunning)
         {
            // TouchInput();
         }
@@ -198,6 +234,10 @@ public class SI_CameraController : MonoBehaviour
 
     void Update_DetectModeStart()
     {
+        if (animationsRunning)
+        {
+            return;
+        }
         if (Input.GetMouseButtonDown(0))
         {
            // Update_CurrentFunction;
@@ -383,27 +423,14 @@ public class SI_CameraController : MonoBehaviour
             float scrollAmount = -axisValue * zoomStep;
             float newSize = mainCamera.orthographicSize + scrollAmount;
 
-            mainCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
-            playerCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
+            worldViewVirtualCamera.m_Lens.OrthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
+            //mainCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
+            //cityCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
 
             ClampCamera();
         }
        
 
-    }
-
-    void ZoomIn()
-    {
-        float newSize = mainCamera.orthographicSize - zoomStep;
-        mainCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
-        playerCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
-    }
-
-    void ZoomOut()
-    {
-        float newSize = mainCamera.orthographicSize + zoomStep;
-        mainCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
-        playerCamera.orthographicSize = Mathf.Clamp(newSize, minCamSize, maxCamSize);
     }
 
     void CheckifCameraMoved()
