@@ -10,6 +10,7 @@ public class MapGenerator : MonoBehaviour
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
+    public float cellSize = 1;
 
     public int octaves;
     [Range(0,1)]
@@ -66,12 +67,22 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public void ClearMap()
+    private void Awake()
     {
-        foreach(Transform obj in tileParent)
+        Instance = this;
+    }
+    public void ClearMap(bool isEditor)
+    {
+        while (transform.childCount > 0)
         {
-            DestroyImmediate(obj.gameObject);
+            DestroyImmediate(transform.GetChild(0).gameObject);
         }
+    }
+
+    private void Start()
+    {
+        ClearMap(false);
+        GenerateMap();
     }
 
     public void DebugDrawNoiseMap()
@@ -96,6 +107,26 @@ public class MapGenerator : MonoBehaviour
         textureRender.sharedMaterial.mainTexture = texture;
         textureRender.transform.localPosition = new Vector3(mapWidth, 1, mapHeight);
 
+    }
+
+    public WorldTile GetTile(Vector3 worldPosition)
+    {
+        WorldTile tileToReturn = null;
+
+        int x, y;
+        GetXY(worldPosition, out x, out y);
+        if (x >= 0 && y >= 0 && x < mapWidth &&  y < mapHeight)
+        {
+            tileToReturn = worldTiles[x, y];
+        }
+
+        return tileToReturn;
+    }
+
+    void GetXY(Vector3 worldPosition, out int x, out int y)
+    {
+        x = Mathf.FloorToInt(worldPosition.x / cellSize);
+        y = Mathf.FloorToInt(worldPosition.y / cellSize);
     }
     public void GenerateMap()
     {
@@ -164,11 +195,21 @@ public class MapGenerator : MonoBehaviour
                 tile.adjacent = tilesToAdd;
                 tile.walkableAdjacent = tilesToAdd;
 
+                List<WorldTile> adjTilesToRemove = new List<WorldTile>();
                 foreach(WorldTile adjTile in tile.walkableAdjacent)
                 {
                     if (adjTile.type != TileType.LAND)
                     {
-                        tile.walkableAdjacent.Remove(adjTile);
+                        adjTilesToRemove.Add(adjTile);
+                        
+                    }
+                }
+
+                for(int i = 0; i < adjTilesToRemove.Count; i++)
+                {
+                    if (tile.walkableAdjacent.Contains(adjTilesToRemove[i]))
+                    {
+                        tile.walkableAdjacent.Remove(adjTilesToRemove[i]);
                     }
                 }
 

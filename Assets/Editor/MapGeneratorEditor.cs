@@ -14,12 +14,12 @@ public class MapGeneratorEditor : Editor
 
         if (GUILayout.Button("Generate"))
         {
-            mapGen.GenerateMap();
+            mapGen.GenerateMap(); 
         }
 
         if (GUILayout.Button("Clear"))
         {
-            mapGen.ClearMap();
+            mapGen.ClearMap(true);
         }
 
         if (GUILayout.Button("Debug Noisemap"))

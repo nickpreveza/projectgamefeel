@@ -21,11 +21,22 @@ public class WorldTile : MonoBehaviour
         this.name = "Tile:" + x + "," + y;
         posX = x;
         posY = y;
-        this.transform.position = new Vector2(x, y);
+       // this.transform.eulerAngles = new Vector3(90, 0, 0);
+        this.transform.position = new Vector3(x, y, 0);
         baseSprite.color = newColor;
     }
 
-   
+    public void Select(bool isRepeatSelection)
+    {
+
+    }
+
+    public void Deselect()
+    {
+
+    }
+
+
 }
 
 public enum TileType
