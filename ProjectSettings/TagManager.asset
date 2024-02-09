@@ -8,6 +8,7 @@ TagManager:
   - Music
   - Background
   - NoMask
+  - Tile
   layers:
   - Default
   - TransparentFX
@@ -38,8 +39,8 @@ TagManager:
   - MidHeightOneWayPlatforms
   - Pushables
   - Stairs
-  - 
-  - 
+  - Interactables
+  - Units
   - 
   m_SortingLayers:
   - name: Background
