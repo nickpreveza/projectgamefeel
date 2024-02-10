@@ -91,7 +91,7 @@ public class SI_CameraController : MonoBehaviour
     bool IsMouseOverGameWindow { get { return !(0 > Input.mousePosition.x || 0 > Input.mousePosition.y || Screen.width < Input.mousePosition.x || Screen.height < Input.mousePosition.y); } }
 
     public float cameraToCityViewDelay = 1f;
-
+    public float cameraReturnDelay = 0.1f;
     void Awake()
     {
         if (Instance == null)
@@ -145,11 +145,21 @@ public class SI_CameraController : MonoBehaviour
 
     public void HideCity()
     {
+        cityViewVirtualCamera.gameObject.SetActive(false);
+        cityViewTransitionVirtualCamera.gameObject.SetActive(true);
+       
+        mainCamera.cullingMask = gameLayerMask;
+        Invoke("EnableWorldCamera", cameraReturnDelay);
+    }
+
+    void EnableWorldCamera()
+    {
         controlsLocked = false;
         cityViewTransitionVirtualCamera.gameObject.SetActive(false);
         cityViewVirtualCamera.gameObject.SetActive(false);
+
         worldViewVirtualCamera.gameObject.SetActive(true);
-        mainCamera.cullingMask = gameLayerMask;
+        
     }
   
     private void Update()
