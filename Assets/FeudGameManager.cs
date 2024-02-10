@@ -44,7 +44,7 @@ public class FeudGameManager : MonoBehaviour
         if (cityVisible)
         {
             SI_CameraController.Instance.ShowCity(city.cityObject.GetComponent<WorldCity>());
-            cityManager.ShowCity();
+            cityManager.ShowCity(city.cityObject.GetComponent<WorldCity>());
         }
         else
         {

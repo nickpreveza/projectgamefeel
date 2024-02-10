@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Android.Gradle;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 [System.Serializable]
@@ -75,6 +77,8 @@ public class MapGenerator : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        availableCityNames = new List<string>(cityNames);
+
     }
     public void ClearMap(bool isEditor)
     {
@@ -255,6 +259,10 @@ public class MapGenerator : MonoBehaviour
                 cityName = availableCityNames[randomIndex];
                 availableCityNames.RemoveAt(randomIndex);
             }
+            else
+            {
+                Debug.LogWarning("No more available names for Cities found");
+            }
 
             newCityTile.SpawnCity(cityName, cityPrefab);
             worldCities.Add(newCityTile);
@@ -418,15 +426,56 @@ public class MapGenerator : MonoBehaviour
     "Sheley",
     "Odonsea",
     "Ingate",
-     "Crevale",
-     "Zremont",
-     "Floshire",
-     "Stigow",
-     "Lapus",
-     "Clurgh",
-     "Cront",
-     "Outinsburgh",
-     "Adenagow"};
+    "Crevale",
+    "Zremont",
+    "Floshire",
+    "Stigow",
+    "Lapus",
+    "Clurgh",
+    "Cront",
+    "Outinsburgh",
+    "Adenagow",
+    "Slespolis",
+    "Hundale",
+    "Obrasall",
+    "Saxsa",
+    "Phanard",
+    "Srico",
+    "Drico",
+    "Preah",
+    "Estertin",
+    "Illesall",
+    "Halas",
+    "Sraset",
+    "Frahsey",
+    "Juistin",
+    "Priekfast",
+    "Oclando",
+    "Dria",
+    "Sria",
+    "Ingow",
+    "Asoby",
+    "Netgas",
+    "Phaham",
+    "Baihta",
+    "Plabury",  
+    "Yuaburn",
+    "Rada",
+    "Flago",
+    "Shoni",
+    "Oseton",
+    "Adenabus",
+    "Gunburg",
+    "Yrecphis",
+    "Ablaaytin",
+    "Depfield",
+    "Chamond",
+    "Qrila",
+    "Clanbu",
+    "Zhord",
+    "Inasshire",
+    "Iriecester",   
+    "Preveza" };
 }
 
 [System.Serializable]
