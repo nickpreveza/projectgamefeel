@@ -193,7 +193,7 @@ public class MapGenerator : MonoBehaviour
     void SpawnPlayer()
     {
         int randomCityFound = Random.Range(0, worldCities.Count);
-        FeudGameManager.Instance.CreatePlayer(worldCities[randomCityFound]);
+        //FeudGameManager.Instance.CreatePlayer(worldCities[randomCityFound]);
 
     }
 
@@ -267,13 +267,6 @@ public class MapGenerator : MonoBehaviour
             newCityTile.SpawnCity(cityName, cityPrefab);
             worldCities.Add(newCityTile);
             citiesSpawned++;
-
-            newCityTile.baseSprite.color = Color.white;
-            foreach(WorldTile tile in GetTileListWithinRadius(newCityTile, 1))
-            {
-                tile.cityObject = newCityTile.cityObject;
-                tile.baseSprite.color = Color.white;
-            }
 
             tilesInRadius = GetTileListWithinRadius(newCityTile, 5);
 

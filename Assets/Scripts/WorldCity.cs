@@ -9,12 +9,23 @@ public class WorldCity : MonoBehaviour
     public CivilizationType civilizationType;
     public CityType cityType;
 
-    public bool hasBarracks;
-    public bool hasForge;
-    public bool hasTavern;
+    public bool playerOwned = false;
+
     public bool hasPort;
 
+    public float friendlinessLevel = 0; //0-1
+    public float powerLevel = 0 ; //0-1
+
     public Wiggler wiggler;
+
+    public List<WorldCity> alliedCities = new List<WorldCity> ();
+    public List<WorldCity> enemyCities = new List<WorldCity> ();
+
+    public List<Item> equipmentToSell = new List<Item>();
+    public List<Item> unitsToSell = new List<Item>();
+    public List<Item> questsToSell = new List<Item>(); //not really selling per se but you get it 
+
+    public List<WorldTile> cityTiles = new List<WorldTile> ();
 
     private void Start()
     {
@@ -39,22 +50,40 @@ public class WorldCity : MonoBehaviour
         switch (cityType)
         {
             case CityType.VILLAGE:
-                hasBarracks = true;
-                hasForge = true;
-                hasTavern = true;
+                powerLevel = 0.3f;
+                friendlinessLevel = 0.5f;
                 break;
             case CityType.FORT:
-                hasBarracks = true;
-                hasForge = true;
-                hasTavern = true;
+                powerLevel = 0.6f;
+                friendlinessLevel = 0.3f;
                 break;
             case CityType.CASTLE:
-                hasBarracks = true;
-                hasForge = true;
-                hasTavern = true;
+                powerLevel = 1f;
+                friendlinessLevel = 0.1f;
                 break;
         }
     }
+
+    void UpdateTileColors(Color color)
+    {
+        foreach(WorldTile tile in cityTiles)
+        {
+            tile.baseSprite.color = color;
+        }
+    }
+
+    public void AssignToCivilization(CivilizationType newCiv)
+    {
+        civilizationType = newCiv;
+
+    }
+
+    public void TransferOwnership()
+    {
+
+    }
+
+
 }
 
 public enum CityType

@@ -66,6 +66,17 @@ public class WorldTile : MonoBehaviour
     {
         cityObject = Instantiate(cityPrefab, this.transform);
         cityObject.GetComponent<WorldCity>().SetUp(newName, CityType.VILLAGE, this);
+
+        baseSprite.color = Color.white;
+
+        List<WorldTile> foundCityTiles = MapGenerator.Instance.GetTileListWithinRadius(this, 1);
+        foreach (WorldTile tile in foundCityTiles)
+        {
+            tile.cityObject = this.cityObject;
+            tile.baseSprite.color = Color.white;
+        }
+
+        cityObject.GetComponent<WorldCity>().cityTiles = foundCityTiles;
     }
 
     public WorldCity City()

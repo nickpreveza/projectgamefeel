@@ -16,15 +16,24 @@ public class CityView : MonoBehaviour
     [SerializeField] CityStructure equipment;
     [SerializeField] CityStructure army;
 
+    [SerializeField] Image friendlinessFill;
+    [SerializeField] Image powerFill;
+
+    [SerializeField] Image civilizationIcon;
+
+
     public void ShowCity(WorldCity _selectedCity)
     {
+        selectedCity = _selectedCity;
+
         leader.targetIconCanvasGroup.alpha = 0;
         quests.targetIconCanvasGroup.alpha = 0;
         equipment.targetIconCanvasGroup.alpha = 0;
         army.targetIconCanvasGroup.alpha = 0;
 
+        friendlinessFill.fillAmount = selectedCity.friendlinessLevel;
+        powerFill.fillAmount = selectedCity.powerLevel;
 
-        selectedCity = _selectedCity;
         cityName.text = selectedCity.cityName;
         cityParent.SetActive(true);
     }
