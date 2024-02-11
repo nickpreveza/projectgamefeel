@@ -49,6 +49,8 @@ public class FeudGameManager : MonoBehaviour
        
         WorldUnit unit = playerInWorld.GetComponent<WorldUnit>();
         unit.SpawnSetup(startingCity.parentTile);
+
+        SI_CameraController.Instance.CenterCamera(unit.parentTile);
         //probably effect or whatever 
     }
 

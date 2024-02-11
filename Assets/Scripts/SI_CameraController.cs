@@ -124,6 +124,15 @@ public class SI_CameraController : MonoBehaviour
         //cityCamera.gameObject.SetActive(false);
     }
 
+    public void CenterCamera(WorldTile tile)
+    {
+        Vector3 prevPos = worldViewVirtualCamera.gameObject.transform.position;
+        prevPos.x = tile.posX;
+        prevPos.y = tile.posY;
+
+        worldViewVirtualCamera.gameObject.transform.position = prevPos;
+    }
+
     public void ShowCity(WorldCity city)
     {
         controlsLocked = true;

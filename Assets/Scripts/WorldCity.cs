@@ -26,6 +26,7 @@ public class WorldCity : MonoBehaviour
     public List<Item> questsToSell = new List<Item>(); //not really selling per se but you get it 
 
     public List<WorldTile> cityTiles = new List<WorldTile> ();
+    public List<WorldTile> adjPerimeter = new List<WorldTile>();
 
     private void Start()
     {
@@ -38,8 +39,9 @@ public class WorldCity : MonoBehaviour
         parentTile = _parentTile;
 
         hasPort = false;
+        adjPerimeter = MapGenerator.Instance.GetAdjTilePerimeterInRadius(parentTile, 2);
 
-        foreach(WorldTile tile in parentTile.adjacent)
+        foreach (WorldTile tile in parentTile.adjacent)
         {
             if(tile.type == TileType.WATER)
             {
@@ -61,6 +63,22 @@ public class WorldCity : MonoBehaviour
                 powerLevel = 1f;
                 friendlinessLevel = 0.1f;
                 break;
+        }
+    }
+
+    public void SelectCity()
+    {
+        foreach(WorldTile tile in adjPerimeter)
+        {
+            tile.ShowHighlight(false);
+        }
+    }
+
+    public void DeselectCity()
+    {
+        foreach (WorldTile tile in adjPerimeter)
+        {
+            tile.HideHighlight();
         }
     }
 

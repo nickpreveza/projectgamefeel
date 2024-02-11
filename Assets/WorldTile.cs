@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class WorldTile : MonoBehaviour
+public class WorldTile : MonoBehaviour, IHeapItem<WorldTile>
 {
     public int posX;
     public int posY;
@@ -13,20 +13,26 @@ public class WorldTile : MonoBehaviour
     public SpriteRenderer baseSprite;
 
     public List<WorldTile> adjacent = new List<WorldTile>();
+    public List<WorldTile> adjacentSides = new List<WorldTile>();
 
     public GameObject cityObject;
 
     public bool occupied;
     public bool isHidden;
+    public bool hasRoad;
+    public bool isCityOrigin;
 
+    int heapIndex;
     public int gCost;
     public int hCost;
-    public int penalty;
+    public int movePenalty;
     public WorldTile pathParent;
-    public bool hasRoad;
+ 
 
     [SerializeField] GameObject highlight;
     public WorldUnit associatedUnit;
+
+    public List<WorldTile> connectedCities = new List<WorldTile>();
 
     public Vector2 PositionVector
     {
@@ -49,6 +55,30 @@ public class WorldTile : MonoBehaviour
             return (cityObject != null);
         }
     }
+
+    public int HeapIndex
+    {
+        get
+        {
+            return heapIndex;
+        }
+        set
+        {
+            heapIndex = value;
+        }
+    }
+
+    public int CompareTo(WorldTile tileToCompare)
+    {
+        int compare = fCost.CompareTo(tileToCompare.fCost);
+        if (compare == 0)
+        {
+            compare = hCost.CompareTo(tileToCompare.hCost);
+        }
+
+        return -compare;
+    }
+
     public void SetData(int x, int y, Color newColor, float _elevation, float cellSize, TileType _type, TerrainType _terrain)
     {
         terrain = _terrain;
@@ -57,13 +87,36 @@ public class WorldTile : MonoBehaviour
         this.name = "Tile:" + x + "," + y;
         posX = x;
         posY = y;
-       // this.transform.eulerAngles = new Vector3(90, 0, 0);
+        // this.transform.eulerAngles = new Vector3(90, 0, 0);
+    
         this.transform.position = new Vector3(x, y, 0);
         baseSprite.color = newColor;
     }
 
     public void Select(bool isRepeatSelection)
     {
+        if (hasCity)
+        {
+            if (City().parentTile.occupied)
+            {
+                FeudGameManager.Instance.ViewCity(true, this);
+                cityObject.GetComponent<WorldCity>().wiggler?.Wiggle();
+            }
+            else if (FeudGameManager.Instance.playerInWorld.GetComponent<WorldUnit>().citiesInRange.Contains(this.City().parentTile))
+            {
+                UnitManager.Instance.SelectUnit(FeudGameManager.Instance.playerInWorld.GetComponent<WorldUnit>());
+                UnitManager.Instance.MoveToTargetTile(this.City().parentTile, true);
+            }
+        }
+        if (hasCity)
+        {
+            Debug.Log("Found City: " + City().cityName);
+            //FeudGameManager.Instance.ViewCity(true, this);
+            cityObject.GetComponent<WorldCity>().wiggler?.Wiggle();
+        }
+
+
+        /*
         if (isHidden)
         {
             UnitManager.Instance.ClearTileSelectMode();
@@ -125,7 +178,7 @@ public class WorldTile : MonoBehaviour
 
             //UIManager.Instance.ShowHexView(this);
         }
-            
+            */
     }
 
 
@@ -156,14 +209,21 @@ public class WorldTile : MonoBehaviour
         highlight.SetActive(false);
     }
 
+    public void CreateRoad()
+    {
+        hasRoad = true;
+        movePenalty = 0;
+        baseSprite.color = FeudGameManager.Instance.colors.roadColor;
+    }
+
     public void SpawnCity(string newName, GameObject cityPrefab)
     {
         cityObject = Instantiate(cityPrefab, this.transform);
         cityObject.GetComponent<WorldCity>().SetUp(newName, CityType.VILLAGE, this);
-
+        isCityOrigin = true;
         baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
 
-        List<WorldTile> foundCityTiles = MapGenerator.Instance.GetTileListWithinRadius(this, 1);
+        List<WorldTile> foundCityTiles = MapGenerator.Instance.GetTileListWithinRadius(this, 1, true);
         foreach (WorldTile tile in foundCityTiles)
         {
             tile.cityObject = this.cityObject;
@@ -171,6 +231,7 @@ public class WorldTile : MonoBehaviour
         }
 
         cityObject.GetComponent<WorldCity>().cityTiles = foundCityTiles;
+        hasRoad = true;
     }
 
     public WorldCity City()
@@ -189,7 +250,7 @@ public class WorldTile : MonoBehaviour
         {
             return false;
         }
-
+        /*
 
         switch (type)
         {
@@ -197,9 +258,9 @@ public class WorldTile : MonoBehaviour
                 return true;
             case TileType.WATER:
                 return false;
-        }
+        }*/
 
-        return false;
+        return true;
     }
 
 

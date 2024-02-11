@@ -48,6 +48,9 @@ public class WorldUnit : MonoBehaviour
 
     public WorldTile assignedPathTarget;
 
+    public List<WorldTile> citiesInRange = new List<WorldTile> ();
+
+
     private void Start()
     {
         attackCharges = maxAttackCharges;
@@ -151,6 +154,7 @@ public class WorldUnit : MonoBehaviour
         attackCharges = maxAttackCharges;
         movePoints = maxMovePoints;
 
+        citiesInRange = new List<WorldTile>(parentTile.connectedCities);
         //color time here 
         UnitManager.Instance.ClearTileSelectMode();
         UnitManager.Instance.SelectUnit(this);

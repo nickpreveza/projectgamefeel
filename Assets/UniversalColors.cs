@@ -8,5 +8,5 @@ public class UniversalColors : MonoBehaviour
     public Color darkBackgroundGeneral;
     public Color friendly;
     public Color power;
-
+    public Color roadColor;
 }

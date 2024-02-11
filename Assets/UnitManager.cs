@@ -61,7 +61,23 @@ public class UnitManager : MonoBehaviour
 
         selectedUnit = newUnit;
 
+        selectedUnit.citiesInRange = new List<WorldTile>(selectedUnit.parentTile.connectedCities);
 
+        foreach (WorldTile cityTile in selectedUnit.citiesInRange)
+        {
+            cityTile.City().DeselectCity();
+        }
+
+        selectedUnit.citiesInRange.Clear();
+        selectedUnit.citiesInRange = new List<WorldTile>(selectedUnit.parentTile.connectedCities);
+
+        foreach (WorldTile cityTile in selectedUnit.citiesInRange)
+        {
+            cityTile.City().SelectCity();
+        }
+
+
+        /*
         if (selectedUnit.movePoints > 0 && !selectedUnit.hasMoved)
         {
             walkList = GetWalkableTiles(newUnit);
@@ -95,10 +111,10 @@ public class UnitManager : MonoBehaviour
             else
             {
                 selectedUnit.noAttackHexInRange = true;
-            }*/
+            }
         }
 
-        selectedUnit.ValidateActions();
+        selectedUnit.ValidateActions(); 
 
         if (selectedUnit.isInteractable)
         {
@@ -107,26 +123,21 @@ public class UnitManager : MonoBehaviour
                 tileSelectMode = true;
             }
                
-        }
+        }*/
 
     }
 
-    public void MoveToTargetTile(WorldTile targetTile)
+    public void MoveToTargetTile(WorldTile targetTile, bool enterCity)
     {
         ClearFoundTiles();
         tileSelectMode = false;
         runningMoveSequence = true;
-        StartCoroutine(MoveSequence(targetTile));
+        StartCoroutine(MoveSequence(targetTile, enterCity));
     }
 
-    IEnumerator MoveSequence(WorldTile targetTile)
+    IEnumerator MoveSequence(WorldTile targetTile, bool enterCity)
     {
-        List<WorldTile> path = UnitManager.Instance.FindPath(selectedUnit, selectedUnit.parentTile, targetTile);
-
-        if (path == null)
-        {
-            path = UnitManager.Instance.FindPath(selectedUnit, selectedUnit.parentTile, targetTile, true);
-        }
+        List<WorldTile> path = MapGenerator.Instance.FindPath(selectedUnit.parentTile, targetTile, false);
 
         if (path == null)
         {
@@ -135,7 +146,7 @@ public class UnitManager : MonoBehaviour
             yield break;
         }
 
-        selectedUnit.Deselect();
+        //selectedUnit.Deselect();
         selectedUnit.parentTile.UnitOut();
 
         tileSelectMode = false;
@@ -191,6 +202,25 @@ public class UnitManager : MonoBehaviour
 
                 //selectedUnit.visualAnim.SetTrigger("Idle");
                 selectedUnit.MoveCompleted();
+
+                if (enterCity)
+                {
+                    FeudGameManager.Instance.ViewCity(true, targetTile);
+                }
+
+                foreach (WorldTile cityTile in selectedUnit.citiesInRange)
+                {
+                    cityTile.City().DeselectCity();
+                }
+
+                selectedUnit.citiesInRange.Clear();
+                selectedUnit.citiesInRange = new List<WorldTile>(targetTile.connectedCities);
+
+                foreach(WorldTile cityTile in selectedUnit.citiesInRange)
+                {
+                    cityTile.City().SelectCity();
+                }
+
                 SelectUnit(selectedUnit);
                
                 runningMoveSequence = false;
@@ -219,7 +249,7 @@ public class UnitManager : MonoBehaviour
             ignoreRoads = true;
         }
 
-        List<WorldTile> tilesInGeneralRange = MapGenerator.Instance.GetTileListWithinRadius(startTile, range);
+        List<WorldTile> tilesInGeneralRange = MapGenerator.Instance.GetTileListWithinRadius(startTile, range, true);
 
         if (tilesInGeneralRange.Contains(startTile))
         {
@@ -416,7 +446,7 @@ public class UnitManager : MonoBehaviour
 
         //get the range we'd have if everything was connected with a raod
         //possible optimization here to have a function to return us only the hexes at the specific range. So if road adds +1, we check for unit.range + roadrange only
-        List<WorldTile> hexesInGeneralRange = MapGenerator.Instance.GetTileListWithinRadius(startTile, range);
+        List<WorldTile> hexesInGeneralRange = MapGenerator.Instance.GetTileListWithinRadius(startTile, range, true);
         //remove the start hex
         if (hexesInGeneralRange.Contains(startTile))
         {

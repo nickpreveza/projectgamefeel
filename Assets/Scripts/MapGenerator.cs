@@ -51,6 +51,16 @@ public class MapGenerator : MonoBehaviour
     public WorldTile[] walkableTiles;
 
     public List<WorldTile> worldCities = new List<WorldTile>();
+
+    public int maxConnectedCities = 4;
+
+    public int MaxSize
+    {
+        get
+        {
+            return mapWidth * mapHeight;
+        }
+    }
     private void OnValidate()
     {
         if (mapWidth < 1)
@@ -174,6 +184,7 @@ public class MapGenerator : MonoBehaviour
                
                 worldTiles[x, y].SetData(x, y, colorMap[x, y], currentHeight, cellSize, regionMap[x, y].type, regionMap[x, y]);
                 worldTiles[x, y].type = regionMap[x, y].type;
+                worldTiles[x, y].movePenalty = regionMap[x, y].movePenalty;
 
                 if (worldTiles[x,y].type == TileType.LAND)
                 {
@@ -186,8 +197,8 @@ public class MapGenerator : MonoBehaviour
 
         FindAdjacentTiles(); //second pass to find adjacent tiles 
         GenerateCities();
-       
-
+        CreateRoads();
+        SpawnPlayer();
     }
 
     //this goes to game manager
@@ -270,7 +281,7 @@ public class MapGenerator : MonoBehaviour
             worldCities.Add(newCityTile);
             citiesSpawned++;
 
-            tilesInRadius = GetTileListWithinRadius(newCityTile, 5);
+            tilesInRadius = GetTileListWithinRadius(newCityTile, 5, true);
 
             foreach (WorldTile tile in tilesInRadius)
             {
@@ -285,7 +296,8 @@ public class MapGenerator : MonoBehaviour
 
         //foreach civ, give them approximately the same number of cities 
         //then for each of those civs, arrange the cities to villages, forts and castles 
-        SpawnPlayer();
+  
+       
     }
 
     public void FindAdjacentTiles()
@@ -295,7 +307,7 @@ public class MapGenerator : MonoBehaviour
             for (int x = 0; x < mapWidth; x++)
             {
                 WorldTile tile = worldTiles[x, y];
-                List<WorldTile> tilesToAdd = GetTileListWithinRadius(tile, 1);
+                List<WorldTile> tilesToAdd = GetTileListWithinRadius(tile, 1, true);
                 if (tilesToAdd.Contains(tile)) //leftover safety check, shouldn't be needed
                 {
                     tilesToAdd.Remove(tile);
@@ -303,17 +315,23 @@ public class MapGenerator : MonoBehaviour
 
                 tile.adjacent = new List<WorldTile>(tilesToAdd);
 
+
+                tilesToAdd = GetTileListWithinRadius(tile, 1, false);
+                if (tilesToAdd.Contains(tile)) //leftover safety check, shouldn't be needed
+                {
+                    tilesToAdd.Remove(tile);
+                }
+
+                tile.adjacentSides = new List<WorldTile>(tilesToAdd);
                 //you might want to filter out the unwanted tiles here for city placement 
             }
         }
     }
 
-    public List<WorldTile> GetTileListWithinRadius(WorldTile centerTile, int range)
+
+    public List<WorldTile> GetAdjTilePerimeterInRadius(WorldTile centerTile, int range)
     {
         List<WorldTile> adjacentTiles = new List<WorldTile>();
-
-       // int[] dx = { 0, 1, 0, -1 }; // Change in x-coordinate
-        //int[] dy = { -1, 0, 1, 0 }; // Change in y-coordinate
 
         for (int dx = -range; dx <= range; dx++)
         {
@@ -321,24 +339,59 @@ public class MapGenerator : MonoBehaviour
             {
                 if (dx + centerTile.posX >= 0 && dx + centerTile.posX < mapWidth && dy + centerTile.posY >= 0 && dy + centerTile.posY < mapHeight)
                 {
-                    adjacentTiles.Add(worldTiles[dx + centerTile.posX, dy + centerTile.posY]);
+                    if (Mathf.Abs(dx) != range && Mathf.Abs(dy) != range)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        adjacentTiles.Add(worldTiles[dx + centerTile.posX, dy + centerTile.posY]);
+                    }
+                    
                 }
             }
         }
-        /*
-        // Loop through each possible adjacent tile
-        for (int i = 0 ; i < dx.Length; i++)
-        {
-            int newX = centerTile.posX + dx[i];
-            int newY = centerTile.posY + dy[i];
 
-            // Check if the new coordinates are within the bounds of the grid
-            if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapWidth)
+        return adjacentTiles;
+    }
+
+    public List<WorldTile> GetTileListWithinRadius(WorldTile centerTile, int range, bool getDiagonalTiles)
+    {
+        List<WorldTile> adjacentTiles = new List<WorldTile>();
+
+
+
+        if (getDiagonalTiles)
+        {
+            for (int dx = -range; dx <= range; dx++)
             {
-                // If within bounds, add the value of the adjacent tile to the list
-                adjacentTiles.Add(worldTiles[newX, newY]);
+                for (int dy = -range; dy <= range; dy++)
+                {
+                    if (dx + centerTile.posX >= 0 && dx + centerTile.posX < mapWidth && dy + centerTile.posY >= 0 && dy + centerTile.posY < mapHeight)
+                    {
+                        adjacentTiles.Add(worldTiles[dx + centerTile.posX, dy + centerTile.posY]);
+                    }
+                }
             }
-        }*/
+        }
+        else
+        {
+            int[] dx = { 0, 1, 0, -1 }; // Change in x-coordinate
+            int[] dy = { -1, 0, 1, 0 }; // Change in y-coordinate
+
+            for (int i = 0; i < dx.Length; i++)
+            {
+                int newX = centerTile.posX + dx[i];
+                int newY = centerTile.posY + dy[i];
+
+                // Check if the new coordinates are within the bounds of the grid
+                if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapWidth)
+                {
+                    // If within bounds, add the value of the adjacent tile to the list
+                    adjacentTiles.Add(worldTiles[newX, newY]);
+                }
+            }
+        }
 
         return adjacentTiles;
     }
@@ -398,6 +451,180 @@ public class MapGenerator : MonoBehaviour
                 worldTiles[x, y].baseSprite.color = regionMap[x, y].colour;
             }
         }
+    }
+
+    void CreateRoads()
+    {
+        foreach (WorldTile originCity in worldCities)
+        {
+            List<WorldTile> tilesWithCityInRange = new List<WorldTile>(originCity.connectedCities);
+
+
+            List<WorldTile> tilesInRange = GetTileListWithinRadius(originCity, 5, true);
+           
+
+            if (tilesWithCityInRange.Count < maxConnectedCities)
+            {
+                List<WorldTile> moreTilesInRange = GetTileListWithinRadius(originCity, 25, true);
+
+                foreach (WorldTile tile in moreTilesInRange)
+                {
+                    if (tile.isCityOrigin && !tilesWithCityInRange.Contains(tile))
+                    {
+                        tilesWithCityInRange.Add(tile);
+                    }
+
+                    if (tilesWithCityInRange.Count >= maxConnectedCities)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            List<WorldTile> selectedCities = new List<WorldTile>();
+
+            foreach(WorldTile cityInRange in tilesWithCityInRange)
+            {
+                if (selectedCities.Count < maxConnectedCities)
+                {
+                    selectedCities.Add(cityInRange);
+                }
+                else
+                {
+
+                    for(int i = 0; i < selectedCities.Count; i++)
+                    {
+                        if (GetDistance(originCity, cityInRange) < GetDistance(originCity, selectedCities[i]))
+                        {
+                            selectedCities[i] = cityInRange;
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            foreach (WorldTile targetCity in selectedCities)
+            {
+
+                if (originCity.connectedCities.Contains(targetCity) || targetCity == originCity)
+                {
+                    continue;
+                }
+
+                List<WorldTile> existingRoadPath = FindPath(originCity, targetCity, true);
+
+                if (existingRoadPath != null)
+                {
+                    originCity.connectedCities.Add(targetCity);
+                    targetCity.connectedCities.Add(originCity);
+                    continue;
+                }
+
+                List<WorldTile> pathToCity = FindPath(originCity, targetCity, false);
+
+                if (pathToCity == null)
+                {
+                    continue;
+                }
+
+                originCity.connectedCities.Add(targetCity);
+                targetCity.connectedCities.Add(originCity);
+
+                foreach (WorldTile tile in pathToCity)
+                {
+                    if (!tile.hasCity && !tile.hasRoad)
+                    {
+                        tile.CreateRoad();
+                    }
+                }
+            }
+
+        }
+    }
+
+    public List<WorldTile> FindPath(WorldTile start, WorldTile end, bool onlyCheckForRoadPath)
+    {
+        Heap<WorldTile> openSet = new Heap<WorldTile>(MaxSize);
+        List<WorldTile> closedSet = new List<WorldTile>();
+        openSet.Add(start);
+
+        while (openSet.Count > 0)
+        {
+            WorldTile current = openSet.RemoveFirst();
+            closedSet.Add(current);
+
+            if (current == end)
+            {
+                List<WorldTile> path = new List<WorldTile>();
+                WorldTile retractCurrent = end;
+
+                while (retractCurrent != start)
+                {
+                    path.Add(retractCurrent);
+                    retractCurrent = retractCurrent.pathParent;
+                }
+
+                path.Reverse();
+                return path;
+            }
+
+            bool shouldSkipAdj = false;
+
+            if (current.type == TileType.WATER)
+            {
+                shouldSkipAdj = true;
+            }
+
+
+            if (onlyCheckForRoadPath)
+            {
+                if (!current.hasRoad)
+                {
+                    shouldSkipAdj = true;
+                }
+            }
+
+            if (!shouldSkipAdj)
+            {
+                foreach (WorldTile adj in current.adjacentSides)
+                {
+                    if (closedSet.Contains(adj) || adj.type != TileType.LAND)
+                    {
+                        continue;
+                    }
+
+
+                    if (onlyCheckForRoadPath)
+                    {
+                        if (!adj.hasRoad)
+                        {
+                            continue;
+                        }
+                    }
+
+                    int movementCostToAdj = current.gCost + GetDistance(current, adj) + adj.movePenalty;
+
+                    if (movementCostToAdj < adj.gCost || !openSet.Contains(adj))
+                    {
+                        adj.gCost = movementCostToAdj;
+                        adj.hCost = GetDistance(adj, end);
+                        adj.pathParent = current;
+
+                        if (!openSet.Contains(adj))
+                        {
+                            openSet.Add(adj);
+                        }
+                        else
+                        {
+                            openSet.UpdateItem(adj);
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public int GetDistance(WorldTile start, WorldTile end)
@@ -504,6 +731,7 @@ public struct TerrainType
     public float height;
     public Color colour;
     public TileType type;
+    public int movePenalty;
 }
 
 public enum Direction
