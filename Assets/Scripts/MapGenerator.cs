@@ -457,55 +457,64 @@ public class MapGenerator : MonoBehaviour
     {
         foreach (WorldTile originCity in worldCities)
         {
-            List<WorldTile> tilesWithCityInRange = new List<WorldTile>(originCity.connectedCities);
+            List<WorldTile> tilesInRange = GetTileListWithinRadius(originCity, 25, true);
+            List<WorldTile> cityTilesInRange = new List<WorldTile>();
+            List<WorldTile> selectedCities = new List<WorldTile>();
 
-
-            List<WorldTile> tilesInRange = GetTileListWithinRadius(originCity, 5, true);
-           
-
-            if (tilesWithCityInRange.Count < maxConnectedCities)
+            if (originCity.connectedCities.Count > maxConnectedCities)
             {
-                List<WorldTile> moreTilesInRange = GetTileListWithinRadius(originCity, 25, true);
+                continue;
+            }
 
-                foreach (WorldTile tile in moreTilesInRange)
+            foreach (WorldTile tile in tilesInRange)
+            {
+                if (tile.isCityOrigin && !originCity.connectedCities.Contains(tile))
                 {
-                    if (tile.isCityOrigin && !tilesWithCityInRange.Contains(tile))
-                    {
-                        tilesWithCityInRange.Add(tile);
-                    }
-
-                    if (tilesWithCityInRange.Count >= maxConnectedCities)
-                    {
-                        break;
-                    }
+                    cityTilesInRange.Add(tile);
                 }
             }
 
-            List<WorldTile> selectedCities = new List<WorldTile>();
-
-            foreach(WorldTile cityInRange in tilesWithCityInRange)
+            foreach(WorldTile tile in cityTilesInRange)
             {
                 if (selectedCities.Count < maxConnectedCities)
                 {
-                    selectedCities.Add(cityInRange);
+                    selectedCities.Add(tile);
                 }
                 else
                 {
 
-                    for(int i = 0; i < selectedCities.Count; i++)
+                    for (int i = 0; i < selectedCities.Count; i++)
                     {
-                        if (GetDistance(originCity, cityInRange) < GetDistance(originCity, selectedCities[i]))
+                        if (GetDistance(originCity, tile) < GetDistance(originCity, selectedCities[i]))
                         {
-                            selectedCities[i] = cityInRange;
+                            selectedCities[i] = tile;
                             break;
                         }
                     }
                 }
             }
 
-
             foreach (WorldTile targetCity in selectedCities)
             {
+              
+                if (targetCity.connectedCities.Contains(originCity))
+                {
+                    if (!originCity.connectedCities.Contains(targetCity))
+                    {
+                        originCity.connectedCities.Add(targetCity);
+                    }
+                }
+
+                if (originCity.connectedCities.Count > maxConnectedCities)
+                {
+                    break;
+                }
+
+                if (targetCity.connectedCities.Count > maxConnectedCities)
+                {
+                    Debug.Log("Target city already had max ammount of connected Cities");
+                    continue;
+                }
 
                 if (originCity.connectedCities.Contains(targetCity) || targetCity == originCity)
                 {
@@ -529,7 +538,12 @@ public class MapGenerator : MonoBehaviour
                 }
 
                 originCity.connectedCities.Add(targetCity);
-                targetCity.connectedCities.Add(originCity);
+
+                if (!targetCity.connectedCities.Contains(originCity))
+                {
+                    targetCity.connectedCities.Add(originCity);
+                }
+               
 
                 foreach (WorldTile tile in pathToCity)
                 {

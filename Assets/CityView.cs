@@ -10,6 +10,7 @@ public class CityView : MonoBehaviour
     public WorldCity selectedCity;
     [SerializeField] GameObject cityParent;
     [SerializeField] TextMeshProUGUI cityName;
+    [SerializeField] TextMeshProUGUI playerGold;
 
     [SerializeField] CityStructure leader;
     [SerializeField] CityStructure quests;
@@ -36,6 +37,13 @@ public class CityView : MonoBehaviour
 
         cityName.text = selectedCity.cityName;
         cityParent.SetActive(true);
+
+        UpdatePlayerStats();
+    }
+
+    public void UpdatePlayerStats()
+    {
+        playerGold.text = FeudGameManager.Instance.playerGold.ToString();
     }
     public void HideCity()
     {

@@ -189,6 +189,11 @@ public class SI_CameraController : MonoBehaviour
             animationsRunning = false;
         }
 
+        if (controlsLocked)
+        {
+            return;
+        }
+
         if (autoMove)
         {
             AutoHexPan();

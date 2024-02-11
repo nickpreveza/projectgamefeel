@@ -11,9 +11,12 @@ public class FeudGameManager : MonoBehaviour
     [SerializeField] CivilizationScriptable[] civilizations;
     [SerializeField] CityView cityManager;
   
-
+   
     public UniversalColors colors;
     //public PlayerData playerData = new PlayerData();
+
+    public int startingGold = 100;
+    public int playerGold;
     void Awake()
     {
         Instance = this;   
@@ -51,6 +54,7 @@ public class FeudGameManager : MonoBehaviour
         unit.SpawnSetup(startingCity.parentTile);
 
         SI_CameraController.Instance.CenterCamera(unit.parentTile);
+        playerGold = startingGold;
         //probably effect or whatever 
     }
 
