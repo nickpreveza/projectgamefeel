@@ -8,7 +8,9 @@ public class CivilizationScriptable : ScriptableObject
 {
     public string civName;
     public Sprite icon;
-    public Color color;
+    public Color tileColor;
+    public Color mainColor;
+    public Color secondaryColor;
     public Sprite[] citySprites; //0 village, 1 settlement, 2 castle 
 
     public Weapon[] weapons;

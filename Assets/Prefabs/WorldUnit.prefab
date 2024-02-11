@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 1922042623107496875}
   m_Layer: 9
   m_Name: WorldUnit
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -195,6 +195,15 @@ MonoBehaviour:
   hasMoved: 0
   hasAttacked: 0
   isInteractable: 0
-  interactableButIgnored: 0
+  maxMovePoints: 1
+  maxAttackCharges: 0
+  walkRange: 2
+  roadModifier: 1
+  attackCharges: 0
   movePoints: 0
-  currentMovePoints: 0
+  parentTile: {fileID: 0}
+  noValidMove: 0
+  noTileInRange: 0
+  noAttackTileInRange: 0
+  buttonActionPossible: 0
+  assignedPathTarget: {fileID: 0}

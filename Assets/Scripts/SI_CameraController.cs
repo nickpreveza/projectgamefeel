@@ -92,6 +92,8 @@ public class SI_CameraController : MonoBehaviour
 
     public float cameraToCityViewDelay = 1f;
     public float cameraReturnDelay = 0.1f;
+
+    public bool tileSelectMode;
     void Awake()
     {
         if (Instance == null)
@@ -470,6 +472,7 @@ public class SI_CameraController : MonoBehaviour
         {
             selectedTile.Deselect();
         }
+
         if (newTile == selectedTile)
         {
             if (repeatSelection)

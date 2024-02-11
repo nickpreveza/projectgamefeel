@@ -6,7 +6,7 @@ public class WorldCity : MonoBehaviour
 {
     public WorldTile parentTile;
     public string cityName;
-    public CivilizationType civilizationType;
+    public CivilizationScriptable civReference;
     public CityType cityType;
 
     public bool playerOwned = false;
@@ -72,18 +72,14 @@ public class WorldCity : MonoBehaviour
         }
     }
 
-    public void AssignToCivilization(CivilizationType newCiv)
+    public void AssignToCivilization()
     {
-        civilizationType = newCiv;
+        // civReference = _civ;
+        // UpdateTileColors(civReference.tileColor);
+
+        UpdateTileColors(FeudGameManager.Instance.colors.playerOwnedColor);
 
     }
-
-    public void TransferOwnership()
-    {
-
-    }
-
-
 }
 
 public enum CityType

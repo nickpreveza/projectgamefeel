@@ -77,7 +77,7 @@ public class MapGenerator : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        availableCityNames = new List<string>(cityNames);
+        availableCityNames = new List<string>(savedCityNames);
 
     }
     public void ClearMap(bool isEditor)
@@ -129,8 +129,8 @@ public class MapGenerator : MonoBehaviour
 
     void GetXY(Vector3 worldPosition, out int x, out int y)
     {
-        x = Mathf.FloorToInt(worldPosition.x / 1) + 1;
-        y = Mathf.FloorToInt(worldPosition.y / 1) + 1;
+        x = Mathf.FloorToInt(worldPosition.x + 0.5f / cellSize);
+        y = Mathf.FloorToInt(worldPosition.y + 0.5f / cellSize);
     }
     public void GenerateMap()
     {
@@ -186,14 +186,16 @@ public class MapGenerator : MonoBehaviour
 
         FindAdjacentTiles(); //second pass to find adjacent tiles 
         GenerateCities();
-        SpawnPlayer();
+       
+
     }
 
     //this goes to game manager
     void SpawnPlayer()
     {
         int randomCityFound = Random.Range(0, worldCities.Count);
-        //FeudGameManager.Instance.CreatePlayer(worldCities[randomCityFound]);
+        WorldCity foundCity = worldCities[randomCityFound].cityObject.GetComponent<WorldCity>();
+        FeudGameManager.Instance.CreatePlayer(foundCity);
 
     }
 
@@ -283,7 +285,7 @@ public class MapGenerator : MonoBehaviour
 
         //foreach civ, give them approximately the same number of cities 
         //then for each of those civs, arrange the cities to villages, forts and castles 
-
+        SpawnPlayer();
     }
 
     public void FindAdjacentTiles()
@@ -398,7 +400,31 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public string[] cityNames = new string[] {
+    public int GetDistance(WorldTile start, WorldTile end)
+    {
+        WorldTile a = start;
+        WorldTile b = end;
+
+        int dY = Mathf.Abs(a.posY - b.posY);
+        int dX = Mathf.Abs(a.posX - b.posX);
+
+        if (dX > mapWidth / 2)
+        {
+            dX = mapWidth - dX;
+        }
+
+        if (dY > mapHeight / 2)
+        {
+            dY = mapHeight - dY;
+        }
+
+        //int dZ = (-dC - dR);
+
+        return Mathf.Max(dX, dY);//, Mathf.Abs(a.S - b.S));
+        //return Mathf.Max(Mathf.Max(Mathf.Abs(dR), Mathf.Abs(dC)), Mathf.Abs(dZ));
+    }
+
+    string[] savedCityNames = new string[] {
     "Bamery",
     "Ochepsa",
     "Edosgend",

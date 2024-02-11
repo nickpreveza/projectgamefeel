@@ -6,9 +6,14 @@ public class FeudGameManager : MonoBehaviour
 {
     public static FeudGameManager Instance;
     public GameObject playerPrefab;
+    public GameObject playerInWorld;
     public bool cityVisible;
     [SerializeField] CivilizationScriptable[] civilizations;
     [SerializeField] CityView cityManager;
+  
+
+    public UniversalColors colors;
+    //public PlayerData playerData = new PlayerData();
     void Awake()
     {
         Instance = this;   
@@ -33,9 +38,18 @@ public class FeudGameManager : MonoBehaviour
         }
     }
 
-    public void CreatePlayer(WorldTile startingCity)
+    public void CreatePlayer(WorldCity startingCity)
     {
+        //playerData.startingCity = startingCity;
+        //playerData.ownedCities.Add(startingCity);
+        //playerData.startingCity.AssignToCivilization();
 
+        startingCity.AssignToCivilization();
+        playerInWorld = Instantiate(playerPrefab, startingCity.parentTile.transform.position, Quaternion.identity);
+       
+        WorldUnit unit = playerInWorld.GetComponent<WorldUnit>();
+        unit.SpawnSetup(startingCity.parentTile);
+        //probably effect or whatever 
     }
 
     public void ViewCity(bool show, WorldTile city = null)

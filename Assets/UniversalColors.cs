@@ -2,15 +2,11 @@ using UnityEngine;
 
 public class UniversalColors : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public Color unclaimedCityColor;
+    public Color playerOwnedColor;
+    public Color backgroundGeneral;
+    public Color darkBackgroundGeneral;
+    public Color friendly;
+    public Color power;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
