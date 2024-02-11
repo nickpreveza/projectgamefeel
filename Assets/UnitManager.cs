@@ -16,6 +16,10 @@ public class UnitManager : MonoBehaviour
 
     public float moveAnimationLenght = .5f;
     public bool runningMoveSequence = false;
+
+    public float totalEncountersInPath;
+    public bool runningArenaCombat;
+
     private void Awake()
     {
         Instance = this;
@@ -127,15 +131,16 @@ public class UnitManager : MonoBehaviour
 
     }
 
-    public void MoveToTargetTile(WorldTile targetTile, bool enterCity)
+    public void MoveToTargetTile(WorldTile targetTile, bool enterCity, bool randomEncounters)
     {
+        totalEncountersInPath = 0;
         ClearFoundTiles();
         tileSelectMode = false;
         runningMoveSequence = true;
-        StartCoroutine(MoveSequence(targetTile, enterCity));
+        StartCoroutine(MoveSequence(targetTile, enterCity, randomEncounters));
     }
 
-    IEnumerator MoveSequence(WorldTile targetTile, bool enterCity)
+    IEnumerator MoveSequence(WorldTile targetTile, bool enterCity, bool randomEncounters)
     {
         List<WorldTile> path = MapGenerator.Instance.FindPath(selectedUnit.parentTile, targetTile, false);
 
@@ -191,6 +196,31 @@ public class UnitManager : MonoBehaviour
                 }
             }
 
+            if (randomEncounters)
+            {
+                float calculatedChance = FeudGameManager.Instance.baseEncounterChance;
+
+                if (totalEncountersInPath > 0)
+                {
+                    calculatedChance -= FeudGameManager.Instance.encounterChanceDecreaseFactor * totalEncountersInPath;
+                }
+
+                calculatedChance = Mathf.Clamp(calculatedChance, 0f, 1f);
+
+                float result = Random.Range(0f, 1f);
+
+                if (result < calculatedChance)
+                {
+                    runningArenaCombat = true;
+                    totalEncountersInPath++;
+                    FeudGameManager.Instance.StartArena(false, pathStep);
+
+                    while (runningArenaCombat)
+                    {
+                        yield return new WaitForEndOfFrame();
+                    }
+                }
+            }
 
             if (pathStep == targetTile)
             {

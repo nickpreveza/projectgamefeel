@@ -14,8 +14,9 @@ public class SI_CameraController : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera worldViewVirtualCamera;
     [SerializeField] CinemachineVirtualCamera cityViewTransitionVirtualCamera;
     [SerializeField] CinemachineVirtualCamera cityViewVirtualCamera;
+    [SerializeField] CinemachineVirtualCamera arenaViewCamera;
 
-    [SerializeField] bool outOfBounds;
+   [SerializeField] bool outOfBounds;
 
     public WorldTile selectedTile;
 
@@ -115,6 +116,7 @@ public class SI_CameraController : MonoBehaviour
         worldViewVirtualCamera.gameObject.SetActive(true);
         cityViewTransitionVirtualCamera.gameObject.SetActive(false);
         cityViewVirtualCamera.gameObject.SetActive(false);
+        arenaViewCamera.gameObject.SetActive(false);
         Update_CurrentFunction = Update_DetectModeStart;
     }
 
@@ -131,6 +133,59 @@ public class SI_CameraController : MonoBehaviour
         prevPos.y = tile.posY;
 
         worldViewVirtualCamera.gameObject.transform.position = prevPos;
+    }
+
+    public void ShowAreanView(bool fromCity, WorldTile targetTile = null)
+    {
+        controlsLocked = true;
+        worldViewVirtualCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(false);
+        cityViewTransitionVirtualCamera.gameObject.SetActive(false);
+
+        if (targetTile != null)
+        {
+            Vector3 prevPos = cityViewTransitionVirtualCamera.gameObject.transform.position;
+            prevPos.x = targetTile.posX + transitionZoomOffsetX;
+            prevPos.y = targetTile.posY + transitionZoomOffsetY;
+            cityViewTransitionVirtualCamera.gameObject.transform.position = prevPos;
+
+            cityViewTransitionVirtualCamera.gameObject.SetActive(true);
+            Invoke("EnableArenaView", cameraToCityViewDelay);
+        }
+        else
+        {
+            
+            arenaViewCamera.gameObject.SetActive(true);
+        }
+      
+    }
+
+    public void HideArena(bool activeCityView)
+    {
+        arenaViewCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(false);
+        mainCamera.cullingMask = gameLayerMask;
+
+        if (activeCityView)
+        {
+            cityViewTransitionVirtualCamera.gameObject.SetActive(true);
+            Invoke("EnableWorldCamera", cameraReturnDelay);
+        }
+        else
+        {
+            cityViewTransitionVirtualCamera.gameObject.SetActive(false);
+            worldViewVirtualCamera.gameObject.SetActive(true);
+        }
+     
+    }
+
+    void EnableArenaView()
+    {
+        worldViewVirtualCamera.gameObject.SetActive(false);
+        cityViewTransitionVirtualCamera.gameObject.SetActive(false);
+        cityViewVirtualCamera.gameObject.SetActive(false);
+
+        arenaViewCamera.gameObject.SetActive(true);
     }
 
     public void ShowCity(WorldCity city)

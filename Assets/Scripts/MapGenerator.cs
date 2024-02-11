@@ -54,6 +54,7 @@ public class MapGenerator : MonoBehaviour
 
     public int maxConnectedCities = 4;
 
+
     public int MaxSize
     {
         get
@@ -752,6 +753,8 @@ public struct TerrainType
     public Color colour;
     public TileType type;
     public int movePenalty;
+    [Range(0f,1f)]
+    public float randomEncounterBaseChance;
 }
 
 public enum Direction

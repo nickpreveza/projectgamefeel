@@ -8,6 +8,8 @@ public class FeudGameManager : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject playerInWorld;
     public bool cityVisible;
+    public bool arenaVisible; //debug
+    public bool arenaOnGoing = false;
     [SerializeField] CivilizationScriptable[] civilizations;
     [SerializeField] CityView cityManager;
   
@@ -17,6 +19,11 @@ public class FeudGameManager : MonoBehaviour
 
     public int startingGold = 100;
     public int playerGold;
+
+    
+    public bool randomEncounters;
+    public float baseEncounterChance;
+    public float encounterChanceDecreaseFactor; //if had an ecnounter, half it. 
     void Awake()
     {
         Instance = this;   
@@ -32,11 +39,19 @@ public class FeudGameManager : MonoBehaviour
 
     private void Update()
     {
-        if (cityVisible)
+        if (cityVisible && !arenaVisible)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 ViewCity(false);
+            }
+        }
+
+        if (arenaVisible && !arenaOnGoing)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseArena();
             }
         }
     }
@@ -72,5 +87,18 @@ public class FeudGameManager : MonoBehaviour
             SI_CameraController.Instance.HideCity();
             cityManager.HideCity();
         }
+    }
+
+    public void StartArena(bool fromCity, WorldTile origin = null)
+    {
+        arenaVisible = true;
+        SI_CameraController.Instance.ShowAreanView(fromCity, origin);
+    }
+
+    public void CloseArena()
+    {
+        arenaVisible = false;
+        UnitManager.Instance.runningArenaCombat = false;
+        SI_CameraController.Instance.HideArena(cityVisible);
     }
 }

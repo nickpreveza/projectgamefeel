@@ -22,7 +22,81 @@ public class CityView : MonoBehaviour
 
     [SerializeField] Image civilizationIcon;
 
+    [SerializeField] GameObject leaderScreen;
+    [SerializeField] GameObject questScreen;
+    [SerializeField] GameObject armyScreen;
+    [SerializeField] GameObject equipmentScreen;
 
+    [SerializeField] GameObject inventoryScreen;
+
+    [SerializeField] TextMeshProUGUI leaderName;
+    [SerializeField] TextMeshProUGUI leaderText;
+    [SerializeField] Image leaderImage;
+    [SerializeField] GameObject tradeBox;
+
+    public bool subPanelOpen = false;
+    public void StructureSelected(CityStructureType structureType)
+    {
+        if (subPanelOpen)
+        {
+            return;
+        }
+        subPanelOpen = true;
+        switch (structureType)
+        {
+            case CityStructureType.LEADER:
+                leaderScreen.SetActive(true);
+                break;
+            case CityStructureType.EQUIPMENT:
+                equipmentScreen.SetActive(true);
+                break;
+            case CityStructureType.QUESTS:
+                questScreen.SetActive(true);
+                break;
+            case CityStructureType.ARMY:
+                armyScreen.SetActive(true);
+                break;
+        }
+    }
+
+    public void BackButton()
+    {
+        if (subPanelOpen)
+        {
+            CloseSubPanles();
+            subPanelOpen = false;
+        }
+    }
+    public void WarButton()
+    {
+
+    }
+
+    public void TraderButton()
+    {
+
+    }
+
+    public void SellButton()
+    {
+
+    }
+
+    public void ShowInventory()
+    {
+        inventoryScreen.SetActive(true);
+        inventoryScreen.GetComponent<InventoryManager>().ShowInventory();
+    }
+
+    public void CloseSubPanles()
+    {
+        leaderScreen.SetActive(false);
+        questScreen.SetActive(false);
+        armyScreen.SetActive(false);
+        equipmentScreen.SetActive(false);
+
+        inventoryScreen.SetActive(false);
+    }
     public void ShowCity(WorldCity _selectedCity)
     {
         selectedCity = _selectedCity;
@@ -41,6 +115,7 @@ public class CityView : MonoBehaviour
         UpdatePlayerStats();
 
         selectedCity.RevealCity();
+        CloseSubPanles();
     }
 
     public void UpdatePlayerStats()

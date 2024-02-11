@@ -15,10 +15,7 @@ public class CityStructure : MonoBehaviour
     bool fadingIn;
     bool fadingOut;
     [SerializeField] float fadingSpeed = 1;
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        Debug.Log("Entered city structure: " + type.ToString());
-    }
+    [SerializeField] CityView handler;
 
     void OnMouseEnter()
     {
@@ -36,6 +33,16 @@ public class CityStructure : MonoBehaviour
         //targetIconCanvasGroup.alpha = 1;
     }
 
+    private void OnMouseDown()
+    {
+        if (IsPointerOverUIObject())
+        {
+
+        }
+
+        handler.StructureSelected(type);
+    }
+
     // ...and the mesh finally turns white when the mouse moves away.
     void OnMouseExit()
     {
@@ -45,6 +52,16 @@ public class CityStructure : MonoBehaviour
         }
 
         fadingOut = true; 
+    }
+
+    private bool IsPointerOverUIObject()
+    {
+        PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+        eventDataCurrentPosition.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+        return results.Count > 0;
+
     }
 
 

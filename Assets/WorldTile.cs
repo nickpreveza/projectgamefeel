@@ -105,7 +105,7 @@ public class WorldTile : MonoBehaviour, IHeapItem<WorldTile>
             else if (FeudGameManager.Instance.playerInWorld.GetComponent<WorldUnit>().citiesInRange.Contains(this.City().parentTile))
             {
                 UnitManager.Instance.SelectUnit(FeudGameManager.Instance.playerInWorld.GetComponent<WorldUnit>());
-                UnitManager.Instance.MoveToTargetTile(this.City().parentTile, true);
+                UnitManager.Instance.MoveToTargetTile(this.City().parentTile, true, FeudGameManager.Instance.randomEncounters);
             }
         }
         if (hasCity)
