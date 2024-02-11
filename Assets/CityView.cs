@@ -39,6 +39,8 @@ public class CityView : MonoBehaviour
         cityParent.SetActive(true);
 
         UpdatePlayerStats();
+
+        selectedCity.RevealCity();
     }
 
     public void UpdatePlayerStats()

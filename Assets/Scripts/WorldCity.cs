@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class WorldCity : MonoBehaviour
@@ -28,6 +29,8 @@ public class WorldCity : MonoBehaviour
     public List<WorldTile> cityTiles = new List<WorldTile> ();
     public List<WorldTile> adjPerimeter = new List<WorldTile>();
 
+    public TextMeshPro cityNameText;
+
     private void Start()
     {
         wiggler = GetComponent<Wiggler>();
@@ -40,6 +43,8 @@ public class WorldCity : MonoBehaviour
 
         hasPort = false;
         adjPerimeter = MapGenerator.Instance.GetAdjTilePerimeterInRadius(parentTile, 2);
+
+        cityNameText.text = "???";
 
         foreach (WorldTile tile in parentTile.adjacent)
         {
@@ -97,6 +102,12 @@ public class WorldCity : MonoBehaviour
 
         UpdateTileColors(FeudGameManager.Instance.colors.playerOwnedColor);
 
+    }
+
+    public void RevealCity()
+    {
+        cityNameText.text = cityName;
+        //maybe more;
     }
 }
 

@@ -476,6 +476,12 @@ public class MapGenerator : MonoBehaviour
 
             foreach(WorldTile tile in cityTilesInRange)
             {
+                if (tile.connectedCities.Count > maxConnectedCities || tile.connectedCities.Contains(originCity))
+                {
+                    continue;
+                }
+
+
                 if (selectedCities.Count < maxConnectedCities)
                 {
                     selectedCities.Add(tile);

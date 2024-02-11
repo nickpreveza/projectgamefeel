@@ -48,6 +48,7 @@ public class FeudGameManager : MonoBehaviour
         //playerData.startingCity.AssignToCivilization();
 
         startingCity.AssignToCivilization();
+        startingCity.RevealCity();
         playerInWorld = Instantiate(playerPrefab, startingCity.parentTile.transform.position, Quaternion.identity);
        
         WorldUnit unit = playerInWorld.GetComponent<WorldUnit>();

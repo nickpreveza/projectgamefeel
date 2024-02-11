@@ -2773,7 +2773,7 @@ PrefabInstance:
     - target: {fileID: 4149167835304183307, guid: b6c3e9f6ebd9afc48802735be3640430,
         type: 3}
       propertyPath: m_Lens.OrthographicSize
-      value: 23.5
+      value: 33
       objectReference: {fileID: 0}
     - target: {fileID: 5287277403182556652, guid: b6c3e9f6ebd9afc48802735be3640430,
         type: 3}
@@ -3017,7 +3017,7 @@ PrefabInstance:
     - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
         type: 3}
       propertyPath: maxConnectedCities
-      value: 7
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
         type: 3}
@@ -3372,27 +3372,27 @@ PrefabInstance:
     - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
         type: 3}
       propertyPath: regions.Array.data[0].movePenalty
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
-        type: 3}
-      propertyPath: regions.Array.data[1].movePenalty
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
-        type: 3}
-      propertyPath: regions.Array.data[2].movePenalty
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
-        type: 3}
-      propertyPath: regions.Array.data[3].movePenalty
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
         type: 3}
-      propertyPath: regions.Array.data[4].movePenalty
+      propertyPath: regions.Array.data[1].movePenalty
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
+        type: 3}
+      propertyPath: regions.Array.data[2].movePenalty
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
+        type: 3}
+      propertyPath: regions.Array.data[3].movePenalty
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
+        type: 3}
+      propertyPath: regions.Array.data[4].movePenalty
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 2630394173913057300, guid: 1d0d7edeb338e684baa2c527342813bc,
         type: 3}
