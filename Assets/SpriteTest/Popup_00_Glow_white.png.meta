@@ -184,7 +184,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Popup_00_Glow_white_0: 6404737556926470984
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

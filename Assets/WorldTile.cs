@@ -221,16 +221,17 @@ public class WorldTile : MonoBehaviour, IHeapItem<WorldTile>
         cityObject = Instantiate(cityPrefab, this.transform);
         cityObject.GetComponent<WorldCity>().SetUp(newName, CityType.VILLAGE, this);
         isCityOrigin = true;
-        baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
+        //baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
 
         List<WorldTile> foundCityTiles = MapGenerator.Instance.GetTileListWithinRadius(this, 1, true);
         foreach (WorldTile tile in foundCityTiles)
         {
             tile.cityObject = this.cityObject;
-            tile.baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
+            //tile.baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
         }
 
         cityObject.GetComponent<WorldCity>().cityTiles = foundCityTiles;
+        cityObject.GetComponent<WorldCity>().AssignToCivilization(cityObject.GetComponent<WorldCity>().civIndex);
         hasRoad = true;
     }
 

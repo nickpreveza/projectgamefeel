@@ -30,6 +30,7 @@ public class CityStructure : MonoBehaviour
     // ...the red fades out to cyan as the mouse is held over...
     void OnMouseOver()
     {
+        Debug.Log("is over structure");
         //targetIconCanvasGroup.alpha = 1;
     }
 
@@ -40,6 +41,7 @@ public class CityStructure : MonoBehaviour
 
         }
 
+        Debug.Log("Structure clicked");
         handler.StructureSelected(type);
     }
 

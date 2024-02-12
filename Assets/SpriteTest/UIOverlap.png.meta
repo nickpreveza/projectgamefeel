@@ -184,7 +184,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      UIOverlap_0: -1115934205016018817
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

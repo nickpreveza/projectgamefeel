@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Android.Gradle;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 [System.Serializable]
@@ -22,9 +20,7 @@ public class MapGenerator : MonoBehaviour
     public float persistnace;
     public float lacunarity;
 
-    public int arenaWidth;
-    public int arenaHeight;
-    public int obstacleChance;
+    
 
     public int seed;
     public Vector2 offset;
@@ -279,6 +275,7 @@ public class MapGenerator : MonoBehaviour
             }
 
             newCityTile.SpawnCity(cityName, cityPrefab);
+            
             worldCities.Add(newCityTile);
             citiesSpawned++;
 

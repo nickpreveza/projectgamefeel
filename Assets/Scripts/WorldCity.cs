@@ -7,7 +7,6 @@ public class WorldCity : MonoBehaviour
 {
     public WorldTile parentTile;
     public string cityName;
-    public CivilizationScriptable civReference;
     public CityType cityType;
 
     public bool playerOwned = false;
@@ -30,6 +29,7 @@ public class WorldCity : MonoBehaviour
     public List<WorldTile> adjPerimeter = new List<WorldTile>();
 
     public TextMeshPro cityNameText;
+    public int civIndex;
 
     private void Start()
     {
@@ -46,6 +46,10 @@ public class WorldCity : MonoBehaviour
 
         cityNameText.text = "???";
 
+        civIndex = Random.Range(1, FeudGameManager.Instance.gameCivilizations.Length);
+        friendlinessLevel = FeudGameManager.Instance.gameCivilizations[civIndex].trustforPlayer;
+        AssignToCivilization(civIndex);
+
         foreach (WorldTile tile in parentTile.adjacent)
         {
             if(tile.type == TileType.WATER)
@@ -58,15 +62,12 @@ public class WorldCity : MonoBehaviour
         {
             case CityType.VILLAGE:
                 powerLevel = 0.3f;
-                friendlinessLevel = 0.5f;
                 break;
             case CityType.FORT:
                 powerLevel = 0.6f;
-                friendlinessLevel = 0.3f;
                 break;
             case CityType.CASTLE:
                 powerLevel = 1f;
-                friendlinessLevel = 0.1f;
                 break;
         }
     }
@@ -95,12 +96,12 @@ public class WorldCity : MonoBehaviour
         }
     }
 
-    public void AssignToCivilization()
+    public void AssignToCivilization(int _civIndex)
     {
         // civReference = _civ;
         // UpdateTileColors(civReference.tileColor);
-
-        UpdateTileColors(FeudGameManager.Instance.colors.playerOwnedColor);
+        civIndex = _civIndex;
+        UpdateTileColors(FeudGameManager.Instance.gameCivilizations[civIndex].tileColor);
 
     }
 

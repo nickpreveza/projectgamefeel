@@ -10,7 +10,9 @@ public class FeudGameManager : MonoBehaviour
     public bool cityVisible;
     public bool arenaVisible; //debug
     public bool arenaOnGoing = false;
-    [SerializeField] CivilizationScriptable[] civilizations;
+    [SerializeField] public Civilization[] gameCivilizations;
+    public int playerCivIndex;
+
     public CityView cityManager;
   
    
@@ -62,7 +64,7 @@ public class FeudGameManager : MonoBehaviour
         //playerData.ownedCities.Add(startingCity);
         //playerData.startingCity.AssignToCivilization();
 
-        startingCity.AssignToCivilization();
+        startingCity.AssignToCivilization(0); //0 is playerIndex
         startingCity.RevealCity();
         playerInWorld = Instantiate(playerPrefab, startingCity.parentTile.transform.position, Quaternion.identity);
        

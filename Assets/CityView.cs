@@ -43,6 +43,10 @@ public class CityView : MonoBehaviour
     public bool subPanelOpen = false;
     public bool tradingOpen = false;
     public bool challengingOpen = false;
+
+    [SerializeField] DragTargetSlot leaderGiftBox;
+    [SerializeField] SpriteRenderer civColorInCityView;
+
     public void StructureSelected(CityStructureType structureType)
     {
 
@@ -57,8 +61,18 @@ public class CityView : MonoBehaviour
         switch (structureType)
         {
             case CityStructureType.LEADER:
-                leaderScreen.SetActive(true);
-                leaderText.text = "I am the law.";
+                if (selectedCity.civIndex == 0)
+                {
+                    leaderOwnedVersion.SetActive(true);
+                    subPanelOpen = true;
+                }
+                else
+                {
+                    leaderScreen.SetActive(true);
+                    SetLeaderTextWelome();
+                    leaderImage.sprite = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderImage;
+                }
+          
                 break;
             case CityStructureType.EQUIPMENT:
                 equipmentScreen.SetActive(true);
@@ -74,19 +88,38 @@ public class CityView : MonoBehaviour
 
     public void ItemGivenToLeader(Item item )
     {
-        Debug.Log("Item consumed");
+        if (FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].wantedItems.Contains(item.type))
+        {
+            leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftΑccept;
+        }
+        else if(FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].hatedItems.Contains(item.type))
+        {
+            leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftDecline;
+        }
+        else
+        {
+            leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftDecline;
+        }
     }
+
+    public void SetLeaderTextTradingDefault()
+    {
+        leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftPrompt;
+    }
+
     public void BackButton()
     {
         if (tradingOpen)
         {
             HideTrading();
+            SetLeaderTextWelome();
             return;
         }
         
         if (challengingOpen)
         {
             HideWar();
+            SetLeaderTextWelome();
             return;
         }
 
@@ -106,12 +139,28 @@ public class CityView : MonoBehaviour
     {
         warScreen.SetActive(true);
         challengingOpen = true;
-        leaderText.text = "I'm not sure you can do that.";
+        leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderChallengePrompt;
     }
     public void HideWar()
     {
         warScreen.SetActive(false);
         challengingOpen = false;
+    }
+
+    public void SetLeaderTextWelome()
+    {
+        if (selectedCity.friendlinessLevel > 0.6)
+        {
+            leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderWelcomePositive;
+        }
+        else if (selectedCity.friendlinessLevel < 0.3)
+        {
+            leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderWelcomeNeutral;
+        }
+        else
+        {
+            leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderWelcomeNegative;
+        }
     }
 
     public void EnterCombatButton()
@@ -122,16 +171,17 @@ public class CityView : MonoBehaviour
     public void ShowTrading()
     {
         tradingOpen = true;
-        leaderText.text = "I'm looking for a keyword";
+        leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftPrompt;
         tradeBox.SetActive(true);
         leaderImage.GetComponent<Animator>().SetTrigger("toTrader");
+        leaderGiftBox.SetCoverFillAmount(0f);
         ShowInventory();
     }
 
     public void HideTrading()
     {
         tradingOpen = false;
-        leaderText.text = "I am the law";
+        SetLeaderTextWelome();
         tradeBox.SetActive(false);
         leaderImage.GetComponent<Animator>().SetTrigger("fromTrader");
         HideInventory();
@@ -155,6 +205,7 @@ public class CityView : MonoBehaviour
         armyScreen.SetActive(false);
         equipmentScreen.SetActive(false);
         warScreen.SetActive(false);
+        leaderOwnedVersion.SetActive(false);
         //leaderOwnedVersion.SetActive(false);
         inventoryScreen.SetActive(false);
         tradeBox.SetActive(false);
@@ -167,11 +218,12 @@ public class CityView : MonoBehaviour
         quests.targetIconCanvasGroup.alpha = 0;
         equipment.targetIconCanvasGroup.alpha = 0;
         army.targetIconCanvasGroup.alpha = 0;
-
+        civColorInCityView.color = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].mainColor;
         friendlinessFill.fillAmount = selectedCity.friendlinessLevel;
         powerFill.fillAmount = selectedCity.powerLevel;
 
         cityName.text = selectedCity.cityName;
+        leaderName.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderName;
         cityParent.SetActive(true);
 
         UpdatePlayerStats();
