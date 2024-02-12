@@ -175,6 +175,7 @@ public class SI_CameraController : MonoBehaviour
         {
             cityViewTransitionVirtualCamera.gameObject.SetActive(false);
             worldViewVirtualCamera.gameObject.SetActive(true);
+            FeudGameManager.Instance.cityManager.UpdateCombatResults();
         }
      
     }

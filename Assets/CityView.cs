@@ -34,18 +34,31 @@ public class CityView : MonoBehaviour
     [SerializeField] Image leaderImage;
     [SerializeField] GameObject tradeBox;
 
+    [SerializeField] GameObject warScreen;
+
+
+    [SerializeField] GameObject leaderOwnedVersion;
+    [SerializeField] GameObject combatResultsScreen;
+
     public bool subPanelOpen = false;
+    public bool tradingOpen = false;
+    public bool challengingOpen = false;
     public void StructureSelected(CityStructureType structureType)
     {
+
         if (subPanelOpen)
         {
             return;
         }
+
+        CloseSubPanles();
+        challengingOpen = false;
         subPanelOpen = true;
         switch (structureType)
         {
             case CityStructureType.LEADER:
                 leaderScreen.SetActive(true);
+                leaderText.text = "I am the law.";
                 break;
             case CityStructureType.EQUIPMENT:
                 equipmentScreen.SetActive(true);
@@ -59,27 +72,69 @@ public class CityView : MonoBehaviour
         }
     }
 
+    public void ItemGivenToLeader(Item item )
+    {
+        Debug.Log("Item consumed");
+    }
     public void BackButton()
     {
+        if (tradingOpen)
+        {
+            HideTrading();
+            return;
+        }
+        
+        if (challengingOpen)
+        {
+            HideWar();
+            return;
+        }
+
         if (subPanelOpen)
         {
             CloseSubPanles();
+            tradingOpen = false;
             subPanelOpen = false;
         }
     }
+
+    public void UpdateCombatResults()
+    {
+        //TODO show a subpanel with the results of combat, update necessary stats 
+    }
     public void WarButton()
     {
-
+        warScreen.SetActive(true);
+        challengingOpen = true;
+        leaderText.text = "I'm not sure you can do that.";
+    }
+    public void HideWar()
+    {
+        warScreen.SetActive(false);
+        challengingOpen = false;
     }
 
-    public void TraderButton()
+    public void EnterCombatButton()
     {
-
+        FeudGameManager.Instance.StartArena(true);
     }
 
-    public void SellButton()
+    public void ShowTrading()
     {
+        tradingOpen = true;
+        leaderText.text = "I'm looking for a keyword";
+        tradeBox.SetActive(true);
+        leaderImage.GetComponent<Animator>().SetTrigger("toTrader");
+        ShowInventory();
+    }
 
+    public void HideTrading()
+    {
+        tradingOpen = false;
+        leaderText.text = "I am the law";
+        tradeBox.SetActive(false);
+        leaderImage.GetComponent<Animator>().SetTrigger("fromTrader");
+        HideInventory();
     }
 
     public void ShowInventory()
@@ -88,14 +143,21 @@ public class CityView : MonoBehaviour
         inventoryScreen.GetComponent<InventoryManager>().ShowInventory();
     }
 
+    public void HideInventory()
+    {
+        inventoryScreen.SetActive(false);
+    }
+
     public void CloseSubPanles()
     {
         leaderScreen.SetActive(false);
         questScreen.SetActive(false);
         armyScreen.SetActive(false);
         equipmentScreen.SetActive(false);
-
+        warScreen.SetActive(false);
+        //leaderOwnedVersion.SetActive(false);
         inventoryScreen.SetActive(false);
+        tradeBox.SetActive(false);
     }
     public void ShowCity(WorldCity _selectedCity)
     {
@@ -116,6 +178,8 @@ public class CityView : MonoBehaviour
 
         selectedCity.RevealCity();
         CloseSubPanles();
+        subPanelOpen = false;
+        tradingOpen = false;
     }
 
     public void UpdatePlayerStats()
@@ -124,6 +188,9 @@ public class CityView : MonoBehaviour
     }
     public void HideCity()
     {
+        subPanelOpen = false;
+        tradingOpen = false;
+        challengingOpen = false;
         cityParent.SetActive(false);
     }
 }

@@ -11,7 +11,7 @@ public class FeudGameManager : MonoBehaviour
     public bool arenaVisible; //debug
     public bool arenaOnGoing = false;
     [SerializeField] CivilizationScriptable[] civilizations;
-    [SerializeField] CityView cityManager;
+    public CityView cityManager;
   
    
     public UniversalColors colors;
@@ -86,6 +86,7 @@ public class FeudGameManager : MonoBehaviour
         {
             SI_CameraController.Instance.HideCity();
             cityManager.HideCity();
+
         }
     }
 

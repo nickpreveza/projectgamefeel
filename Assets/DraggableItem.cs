@@ -9,8 +9,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public Transform dragParent;
     public Transform originParent;
     public bool foundContainer;
-
+    public Item item; //the button parent should set the item here 
     Vector3 currentPos;
+    public GameObject parentButton;
 
     void Start()
     {
