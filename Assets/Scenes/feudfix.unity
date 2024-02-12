@@ -14329,6 +14329,16 @@ PrefabInstance:
       propertyPath: handler
       value: 
       objectReference: {fileID: 184189576}
+    - target: {fileID: 8083771674188011130, guid: 37878ec7f5171be40aa3ee31df472525,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.21568628
+      objectReference: {fileID: 0}
+    - target: {fileID: 8083771674188011130, guid: 37878ec7f5171be40aa3ee31df472525,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.27450982
+      objectReference: {fileID: 0}
     - target: {fileID: 9027777017419994148, guid: 37878ec7f5171be40aa3ee31df472525,
         type: 3}
       propertyPath: m_Enabled
@@ -15169,13 +15179,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3986101056159813450, guid: b6c3e9f6ebd9afc48802735be3640430,
         type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0.21568628
+      objectReference: {fileID: 0}
+    - target: {fileID: 3986101056159813450, guid: b6c3e9f6ebd9afc48802735be3640430,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0.27450982
+      objectReference: {fileID: 0}
+    - target: {fileID: 3986101056159813450, guid: b6c3e9f6ebd9afc48802735be3640430,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0.28235295
+      objectReference: {fileID: 0}
+    - target: {fileID: 3986101056159813450, guid: b6c3e9f6ebd9afc48802735be3640430,
+        type: 3}
       propertyPath: m_CullingMask.m_Bits
       value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 4149167835304183307, guid: b6c3e9f6ebd9afc48802735be3640430,
         type: 3}
       propertyPath: m_Lens.OrthographicSize
-      value: 17
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 5287277403182556652, guid: b6c3e9f6ebd9afc48802735be3640430,
         type: 3}
