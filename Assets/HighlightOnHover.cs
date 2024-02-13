@@ -1,27 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-
-public class CityStructure : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class HighlightOnHover : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    public CanvasGroup targetIconCanvasGroup;
-    public CityStructureType type;
-
     public bool animating;
     bool fadingIn;
     bool fadingOut;
+    [SerializeField] CanvasGroup targetCanvasGroup;
     [SerializeField] float fadingSpeed = 1;
-    [SerializeField] CityView handler;
 
+    void Start()
+    {
+        targetCanvasGroup.alpha = 0;
+    }
     private void Update()
     {
         if (fadingIn)
         {
-            if (targetIconCanvasGroup.alpha < 1)
+            if (targetCanvasGroup.alpha < 1)
             {
-                targetIconCanvasGroup.alpha += 0.1f * fadingSpeed;
+                targetCanvasGroup.alpha += 0.1f * fadingSpeed;
             }
             else
             {
@@ -30,14 +28,14 @@ public class CityStructure : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         }
         else if (fadingOut)
         {
-            if (targetIconCanvasGroup.alpha > 0)
+            if (targetCanvasGroup.alpha > 0)
             {
-                targetIconCanvasGroup.alpha -= 0.1f * fadingSpeed;
+                targetCanvasGroup.alpha -= 0.1f * fadingSpeed;
             }
             else
             {
                 fadingOut = false;
-   
+
             }
         }
     }
@@ -53,7 +51,7 @@ public class CityStructure : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        handler.StructureSelected(type);
+       
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -65,12 +63,4 @@ public class CityStructure : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
         fadingOut = true;
     }
-}
-
-public enum CityStructureType
-{
-    LEADER,
-    ARMY,
-    SHOP,
-    QUESTS
 }

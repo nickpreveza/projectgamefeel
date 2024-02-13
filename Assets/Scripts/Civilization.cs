@@ -27,11 +27,24 @@ public class Civilization
     public string leaderGiftΑccept;
     public string leaderGiftDecline;
 
-    public List<ItemType> wantedItems = new List<ItemType>();
-    public List<ItemType> hatedItems = new List<ItemType>();
+    public List<ItemType> wantedItemsTypes = new List<ItemType>();
+    public List<ItemType> hatedItemsTypes = new List<ItemType>();
     public List<int> knownCivs = new List<int>();
 
+    public ItemScriptable[] storeItemsBase;
+    public ItemScriptable[] giveItemsBase;
+    public ItemScriptable[] startingItemsBase;
+
+    public List<Item> storeItemsPool = new List<Item>(); //don't remove these 
+    public List<Item> selectedStoreItems = new List<Item>(); //should be 4
+
+    public WorldCity lastVisitedCity; 
+
     public int gold;
+
+    public List<Item> ownedItems = new List<Item>();
+    public List<Item> itemToGivesAfterTrader = new List<Item>();
+
     public float Discount
     {
         get
@@ -40,9 +53,7 @@ public class Civilization
         }
     }
 
-    public List<Item> ownedItems = new List<Item>();
-    public List<Item> sellableItems = new List<Item>();
-    public List<Item> itemToGivesAfterTrader = new List<Item>();
+  
 }
 
 [System.Serializable]
@@ -62,7 +73,23 @@ public class Item
     public float attackSpeed;
     public int damageOrDefense;
 
+    public void SetData(Item item)
+    {
+        id = item.id;
+        icon = item.icon;
+        level = item.level;
+        buyValue = item.buyValue;
+        sellValue = item.sellValue;
+        ItemType type = item.type;
 
+        strRequirment = item.strRequirment;
+        conRequirment = item.conRequirment;
+        intRequirment= item.intRequirment;
+
+        attackSpeed = item.attackSpeed;
+        damageOrDefense = item.damageOrDefense;
+
+}
 }
 [System.Serializable]
 
@@ -71,12 +98,14 @@ public enum ItemType
     DAGGER,
     SWORD,
     LONGSWORD,
+    AXE,
     SPEAR,
     BOW,
     CROSSBOW,
     SHIELD,
     POTION,
     SCROLL,
+    ARMOR,
     UNIT
 
 }

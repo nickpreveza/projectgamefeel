@@ -31,6 +31,8 @@ public class DragTargetSlot : MonoBehaviour, IDropHandler
             itemData = draggableItem.item;
             parentButton = draggableItem.parentButton;
             boxCover.transform.SetAsLastSibling();
+
+            FeudGameManager.Instance.Player().ownedItems.Remove(draggableItem.item);
             StartCoroutine(SendItemCoroutine());
         }
    }

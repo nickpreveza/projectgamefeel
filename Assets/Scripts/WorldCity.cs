@@ -13,9 +13,6 @@ public class WorldCity : MonoBehaviour
 
     public bool hasPort;
 
-    public float friendlinessLevel = 0; //0-1
-    public float powerLevel = 0 ; //0-1
-
     public Wiggler wiggler;
 
     public List<WorldCity> alliedCities = new List<WorldCity> ();
@@ -49,7 +46,7 @@ public class WorldCity : MonoBehaviour
         cityNameText.text = "???";
 
         civIndex = Random.Range(1, FeudGameManager.Instance.gameCivilizations.Length);
-        friendlinessLevel = FeudGameManager.Instance.gameCivilizations[civIndex].trustforPlayer;
+
         AssignToCivilization(civIndex);
 
         foreach (WorldTile tile in parentTile.adjacent)
@@ -58,19 +55,6 @@ public class WorldCity : MonoBehaviour
             {
                 hasPort = true;
             }
-        }
-
-        switch (cityType)
-        {
-            case CityType.VILLAGE:
-                powerLevel = 0.3f;
-                break;
-            case CityType.FORT:
-                powerLevel = 0.6f;
-                break;
-            case CityType.CASTLE:
-                powerLevel = 1f;
-                break;
         }
     }
 

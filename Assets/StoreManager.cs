@@ -1,16 +1,88 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class StoreManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] InventoryManager userInventory;
+    [SerializeField] InventoryManager storeInventory;
+
+    [SerializeField] DragStoreTarget sellTarget;
+    [SerializeField] DragStoreTarget buyTarget;
+
+    CityView handler;
+
+    public int sellTargetValue;
+    public int buyBoxValue;
+
+    public int sellBoxHasObject;
+    public int buyBoxHasObject;
+
+    [SerializeField] Button makeOffer;
+    [SerializeField] TextMeshProUGUI subtitleButton;
+
+    [SerializeField] string defaultSubText;
+    [SerializeField] string negativeResponseToOffer;
+    [SerializeField] string positiveResponseToOffer;
+
+    public void ShowStore(CityView _handler)
     {
+        handler = _handler;
+        userInventory.gameObject.SetActive(true);
+
         
+        userInventory.ShowCollection(FeudGameManager.Instance.Player().ownedItems);
+        storeInventory.ShowCollection(FeudGameManager.Instance.GetCiv(handler.selectedCity.civIndex).selectedStoreItems);
+
+        sellTarget.handler = this;
+        buyTarget.handler = this;
+        sellTarget.hasItemsToReturn = false;
+        buyTarget.hasItemsToReturn = false;
+        sellTarget.ClearBox();
+        buyTarget.ClearBox();
+
+        subtitleButton.text = defaultSubText;
+        UpdateOfferButton();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UpdateOfferButton()
     {
-        
+        sellTarget.UpdateValueIcons();
+        buyTarget.UpdateValueIcons();
+
+        if (sellTarget.SellValue > 0)
+        {
+            makeOffer.interactable = true;
+        }
+        else
+        {
+            makeOffer.interactable = false;
+        }
+    }
+
+    public void MakeOffer()
+    {
+        if (sellTarget.SellValue >= buyTarget.BuyValue) //something something about trust 
+        {
+            Debug.Log("Success!");
+            buyTarget.AddItemsToUserInventory();
+            sellTarget.RemoveItemsFromUserInventory();
+            sellTarget.ClearBox();
+            buyTarget.ClearBox();
+            subtitleButton.text = positiveResponseToOffer;
+
+            userInventory.ShowCollection(FeudGameManager.Instance.Player().ownedItems);
+        }
+        else
+        {
+            subtitleButton.text = negativeResponseToOffer;
+        }
+    }
+
+    public void HideStore()
+    {
+        userInventory.gameObject.SetActive(false);
+        sellTarget.ClearBox();
+        buyTarget.ClearBox();
     }
 }

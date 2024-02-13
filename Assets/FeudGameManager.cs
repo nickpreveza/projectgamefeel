@@ -25,7 +25,7 @@ public class FeudGameManager : MonoBehaviour
     public float baseEncounterChance;
     public float encounterChanceDecreaseFactor; //if had an ecnounter, half it. 
 
-    public List<Item> worldItems;
+ 
     public Civilization GetCiv(int playerIndex)
     {
         return gameCivilizations[playerIndex];
@@ -86,18 +86,53 @@ public class FeudGameManager : MonoBehaviour
         for(int i = 0; i < gameCivilizations.Length; i++)
         {
             gameCivilizations[i].knownCivs.Add(i);
+
+            foreach(ItemScriptable itemScriptable in gameCivilizations[i].storeItemsBase)
+            {
+                Item item = new Item();
+                item.SetData(itemScriptable.item);
+                gameCivilizations[i].storeItemsPool.Add(item);
+            }
+
+            foreach (ItemScriptable itemScriptable in gameCivilizations[i].startingItemsBase)
+            {
+                Item item = new Item();
+                item.SetData(itemScriptable.item);
+                gameCivilizations[i].ownedItems.Add(item);
+            }
+
+        }
+        //probably effect or whatever 
+    }
+
+    public void RefreshStoreItems(int civIndex)
+    {
+        List<Item> itemPool = new List<Item>(gameCivilizations[civIndex].storeItemsPool);
+        List<Item> selectedStoreItems = new List<Item>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            int selectedIndex = Random.Range(0, itemPool.Count);
+            selectedStoreItems.Add(itemPool[selectedIndex]);
+            itemPool.Remove(itemPool[selectedIndex]);
         }
 
-        Player().ownedItems = new List<Item>(worldItems);
-        //probably effect or whatever 
+        gameCivilizations[civIndex].selectedStoreItems = selectedStoreItems;
     }
 
     public void ViewCity(bool show, WorldTile city = null)
     {
         cityVisible = show;
+   
         if (cityVisible)
         {
             SI_CameraController.Instance.ShowCity(city.cityObject.GetComponent<WorldCity>());
+            if (Player().lastVisitedCity != city.cityObject.GetComponent<WorldCity>())
+            {
+                RefreshStoreItems(city.cityObject.GetComponent<WorldCity>().civIndex);
+            }
+            Player().lastVisitedCity = city.cityObject.GetComponent<WorldCity>();
+
             cityManager.ShowCity(city.cityObject.GetComponent<WorldCity>());
         }
         else

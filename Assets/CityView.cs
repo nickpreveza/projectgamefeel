@@ -8,6 +8,7 @@ using ntw.CurvedTextMeshPro;
 
 public class CityView : MonoBehaviour
 {
+    public static CityView Instance;
 
     public WorldCity selectedCity;
     [SerializeField] GameObject cityParent;
@@ -27,9 +28,10 @@ public class CityView : MonoBehaviour
     [SerializeField] GameObject leaderScreen;
     [SerializeField] GameObject questScreen;
     [SerializeField] GameObject armyScreen;
-    [SerializeField] GameObject equipmentScreen;
+    [SerializeField] GameObject shopScreen;
+    [SerializeField] GameObject vecrticalInventory;
 
-    [SerializeField] GameObject inventoryScreen;
+   [SerializeField] GameObject inventoryScreen;
 
     [SerializeField] TextMeshProUGUI leaderName;
     [SerializeField] TextMeshProUGUI leaderText;
@@ -45,6 +47,7 @@ public class CityView : MonoBehaviour
     public bool subPanelOpen = false;
     public bool tradingOpen = false;
     public bool challengingOpen = false;
+    public bool storeOpen = false;
 
     [SerializeField] DragTargetSlot leaderGiftBox;
     [SerializeField] Image civColorInCityView;
@@ -54,6 +57,10 @@ public class CityView : MonoBehaviour
 
     [SerializeField] Image leaderSprite;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     public void StructureSelected(CityStructureType structureType)
     {
@@ -72,6 +79,7 @@ public class CityView : MonoBehaviour
                 if (selectedCity.civIndex == 0)
                 {
                     leaderOwnedVersion.SetActive(true);
+                 
                     subPanelOpen = true;
                 }
                 else
@@ -84,8 +92,10 @@ public class CityView : MonoBehaviour
                 }
           
                 break;
-            case CityStructureType.EQUIPMENT:
-                equipmentScreen.SetActive(true);
+            case CityStructureType.SHOP:
+                shopScreen.SetActive(true);
+                shopScreen.GetComponent<StoreManager>().ShowStore(this);
+                storeOpen = true;
                 break;
             case CityStructureType.QUESTS:
                 questScreen.SetActive(true);
@@ -98,11 +108,11 @@ public class CityView : MonoBehaviour
 
     public void ItemGivenToLeader(Item item )
     {
-        if (FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].wantedItems.Contains(item.type))
+        if (FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].wantedItemsTypes.Contains(item.type))
         {
             leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftΑccept;
         }
-        else if(FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].hatedItems.Contains(item.type))
+        else if(FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].hatedItemsTypes.Contains(item.type))
         {
             leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftDecline;
         }
@@ -110,6 +120,8 @@ public class CityView : MonoBehaviour
         {
             leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderGiftDecline;
         }
+
+        //send reward here 
     }
 
     public void SetLeaderTextTradingDefault()
@@ -133,11 +145,17 @@ public class CityView : MonoBehaviour
             return;
         }
 
+        if (storeOpen)
+        {
+            shopScreen.GetComponent<StoreManager>().HideStore();
+        }
+
         if (subPanelOpen)
         {
             CloseSubPanles();
             tradingOpen = false;
             subPanelOpen = false;
+            storeOpen = false;
             ShowCity(selectedCity);
         }
     }
@@ -160,11 +178,11 @@ public class CityView : MonoBehaviour
 
     public void SetLeaderTextWelome()
     {
-        if (selectedCity.friendlinessLevel > 0.6)
+        if (FeudGameManager.Instance.GetCiv(selectedCity.civIndex).trustforPlayer > 0.6)
         {
             leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderWelcomePositive;
         }
-        else if (selectedCity.friendlinessLevel < 0.3)
+        else if (FeudGameManager.Instance.GetCiv(selectedCity.civIndex).trustforPlayer > 0.3)
         {
             leaderText.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderWelcomeNeutral;
         }
@@ -201,7 +219,7 @@ public class CityView : MonoBehaviour
     public void ShowInventory()
     {
         inventoryScreen.SetActive(true);
-        inventoryScreen.GetComponent<InventoryManager>().ShowInventory();
+        inventoryScreen.GetComponent<InventoryManager>().ShowCollection(FeudGameManager.Instance.Player().ownedItems);
     }
 
     public void HideInventory()
@@ -214,9 +232,15 @@ public class CityView : MonoBehaviour
         leaderScreen.SetActive(false);
         questScreen.SetActive(false);
         armyScreen.SetActive(false);
-        equipmentScreen.SetActive(false);
+        shopScreen.SetActive(false);
         warScreen.SetActive(false);
         leaderOwnedVersion.SetActive(false);
+        vecrticalInventory.SetActive(false);
+        if (shopScreen.activeSelf)
+        {
+            shopScreen.GetComponent<StoreManager>().HideStore();
+        }
+        shopScreen.SetActive(false);
         //leaderOwnedVersion.SetActive(false);
         inventoryScreen.SetActive(false);
         tradeBox.SetActive(false);
@@ -230,7 +254,7 @@ public class CityView : MonoBehaviour
         shopButton.targetIconCanvasGroup.alpha = 0;
         armyButton.targetIconCanvasGroup.alpha = 0;
       
-        friendlinessFill.fillAmount = selectedCity.friendlinessLevel;
+        friendlinessFill.fillAmount = FeudGameManager.Instance.GetCiv(selectedCity.civIndex).trustforPlayer;
         //powerFill.fillAmount = selectedCity.powerLevel;
 
         cityName.text = selectedCity.cityName;
@@ -244,9 +268,24 @@ public class CityView : MonoBehaviour
 
         if (!selectedCity.hasPlayerSeenLeader)
         {
-            leaderQuestionMark.SetActive(true);
-            trustQuestionMark.SetActive(true);
-            civColorInCityView.color = Color.white;
+
+            if (selectedCity.civIndex == 0)
+            {
+                leaderQuestionMark.SetActive(false);
+                trustQuestionMark.SetActive(false);
+                civColorInCityView.color = FeudGameManager.Instance.GetCiv(selectedCity.civIndex).mainColor;
+                SetLeaderSpriteColor(FeudGameManager.Instance.GetCiv(selectedCity.civIndex).mainColor);
+                selectedCity.hasPlayerSeenLeader = true;
+            }
+            else
+            {
+                leaderQuestionMark.SetActive(true);
+                trustQuestionMark.SetActive(true);
+                civColorInCityView.color = Color.white;
+            }
+           
+
+            
         }
         else
         {

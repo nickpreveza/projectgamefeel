@@ -12,8 +12,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public Item item; //the button parent should set the item here 
     Vector3 currentPos;
     public GameObject parentButton;
-    public DraggedItemState state = DraggedItemState.ReturnToParent;
 
+    public ItemMoveTarget moveTarget = ItemMoveTarget.INVALID;
+    public InventoryManager handler;
     void Start()
     {
         raycastItem = this.GetComponent<Image>();
@@ -25,6 +26,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             return;
         }
+      
         transform.SetParent(whileDragParent);
         transform.SetAsLastSibling();
 
@@ -45,19 +47,38 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnEndDrag(PointerEventData eventData)
     {
         raycastItem.raycastTarget = true;
-        switch (state)
+
+        if (!foundContainer)
         {
-            case DraggedItemState.ReturnToParent:
-                if (!foundContainer)
-                {
-                    transform.SetParent(originParent);
-                }
-            break;
-            case DraggedItemState.ReturnToStore:
-                break;
-            case DraggedItemState.ReturnToInventory:
-                break;
+            transform.SetParent(originParent);
+            transform.parent.SetAsLastSibling();          
         }
+        /*
+        else
+        {
+            switch (state)
+            {
+                case DraggedItemState.ReturnToParent:
+
+                    break;
+                case DraggedItemState.ReturnToStore:
+                    CityView.Instance.storeManager.AddItem();
+
+                    break;
+                case DraggedItemState.ReturnToInventory:
+                    break;
+            }
+        }*/
+       
 
     }
+}
+
+public enum ItemMoveTarget
+{
+    STORE,
+    INVENTORY,
+    BUYBOX,
+    SELLBOX,
+    INVALID
 }

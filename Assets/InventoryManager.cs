@@ -1,47 +1,107 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
-public class InventoryManager : MonoBehaviour
+public class InventoryManager : MonoBehaviour, IDropHandler
 {
     [SerializeField] Transform contentParent;
     [SerializeField] GameObject buttonPrefab;
-    [SerializeField] Transform dragParentToAssign;
+
     public List<Item> itemsToDisplay = new List<Item>();
     [SerializeField] Transform canvasDraggableParent;
+    public List<Item> refList = new List<Item>();
+    public ItemMoveTarget localMoveTarget;
+    public ItemMoveTarget moveTargetToSet;
 
-    public void ShowInventory()
+    [SerializeField] StoreManager handler;
+    [SerializeField] GameObject emptyDisclaimer;
+    public void AddItem(Item item, bool setAsFirstSibling, bool refreshVisual)
+    {
+        if (setAsFirstSibling)
+        {
+            refList.Insert(0, item);
+        }
+        else
+        {
+            refList.Add(item);
+        }
+
+        if (refreshVisual)
+        {
+            ShowCollection(refList);
+        }
+       
+    }
+
+    public void RemoveItem(Item item, bool updateVisual)
+    {
+        if (refList.Contains(item))
+        {
+            refList.Remove(item);
+
+            if (updateVisual)
+            {
+                ShowCollection(refList);
+            }
+           
+        }
+    }
+    public void ShowCollection(List<Item> itemList)
     {
         ClearInventory();
-
-        itemsToDisplay = new List<Item>(FeudGameManager.Instance.Player().ownedItems);
-        foreach(Item item in itemsToDisplay)
+        refList = itemList;
+        itemsToDisplay = new List<Item>(itemList);
+        if (itemsToDisplay.Count <= 0)
         {
-            Instantiate(buttonPrefab, contentParent);
-            buttonPrefab.GetComponent<InventoryItem>().SetData(item, canvasDraggableParent);
+            emptyDisclaimer?.SetActive(true);
         }
-        //foreach item in player 
-        //create an inventory button 
-        //set up each button to have the leader's inventory box as target 
+        else
+        {
+            emptyDisclaimer?.SetActive(false);
+        }
+        foreach (Item item in itemsToDisplay)
+        {
+            GameObject obj = Instantiate(buttonPrefab, contentParent);
+            obj.GetComponent<InventoryItem>().SetData(this, item, canvasDraggableParent);
+        }
     }
 
     void ClearInventory()
     {
-        foreach(Transform child in contentParent)
+        refList = new List<Item>();
+
+        foreach (Transform child in contentParent)
         {
+            child.gameObject.SetActive(false);
             Destroy(child.gameObject);
         }
+
+        /*
+        while (contentParent.childCount > 0)
+        {
+            Destroy(contentParent.GetChild(0).gameObject);
+        }*/
     }
 
-    public void HideInventory()
+    public void OnDrop(PointerEventData eventData)
     {
+        GameObject dropped = eventData.pointerDrag;
+        DraggableItem draggableItem = dropped.GetComponent<DraggableItem>();
 
+        if (draggableItem != null)
+        {
+            if (draggableItem.moveTarget != localMoveTarget)
+            {
+                return;
+            }
+
+            AddItem(draggableItem.item, true, true);
+
+            Destroy(draggableItem.gameObject);
+
+            handler.UpdateOfferButton();
+        }
     }
-
-    public void OnDragCompleted()
-    {
-
-    }
-
 
 }
