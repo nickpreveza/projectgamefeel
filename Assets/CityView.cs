@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using AllIn1SpriteShader;
+using ntw.CurvedTextMeshPro;
 
 public class CityView : MonoBehaviour
 {
@@ -12,10 +14,10 @@ public class CityView : MonoBehaviour
     [SerializeField] TextMeshProUGUI cityName;
     [SerializeField] TextMeshProUGUI playerGold;
 
-    [SerializeField] CityStructure leader;
-    [SerializeField] CityStructure quests;
-    [SerializeField] CityStructure equipment;
-    [SerializeField] CityStructure army;
+    [SerializeField] CityStructure leaderButton;
+    [SerializeField] CityStructure questsButton;
+    [SerializeField] CityStructure shopButton;
+    [SerializeField] CityStructure armyButton;
 
     [SerializeField] Image friendlinessFill;
     [SerializeField] Image powerFill;
@@ -45,7 +47,13 @@ public class CityView : MonoBehaviour
     public bool challengingOpen = false;
 
     [SerializeField] DragTargetSlot leaderGiftBox;
-    [SerializeField] SpriteRenderer civColorInCityView;
+    [SerializeField] Image civColorInCityView;
+
+    [SerializeField] GameObject leaderQuestionMark;
+    [SerializeField] GameObject trustQuestionMark;
+
+    [SerializeField] Image leaderSprite;
+
 
     public void StructureSelected(CityStructureType structureType)
     {
@@ -70,6 +78,8 @@ public class CityView : MonoBehaviour
                 {
                     leaderScreen.SetActive(true);
                     SetLeaderTextWelome();
+                   
+                    selectedCity.LeaderRevealed();
                     leaderImage.sprite = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderImage;
                 }
           
@@ -128,6 +138,7 @@ public class CityView : MonoBehaviour
             CloseSubPanles();
             tradingOpen = false;
             subPanelOpen = false;
+            ShowCity(selectedCity);
         }
     }
 
@@ -214,29 +225,54 @@ public class CityView : MonoBehaviour
     {
         selectedCity = _selectedCity;
 
-        leader.targetIconCanvasGroup.alpha = 0;
-        quests.targetIconCanvasGroup.alpha = 0;
-        equipment.targetIconCanvasGroup.alpha = 0;
-        army.targetIconCanvasGroup.alpha = 0;
-        civColorInCityView.color = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].mainColor;
+        leaderButton.targetIconCanvasGroup.alpha = 0;
+        questsButton.targetIconCanvasGroup.alpha = 0;
+        shopButton.targetIconCanvasGroup.alpha = 0;
+        armyButton.targetIconCanvasGroup.alpha = 0;
+      
         friendlinessFill.fillAmount = selectedCity.friendlinessLevel;
-        powerFill.fillAmount = selectedCity.powerLevel;
+        //powerFill.fillAmount = selectedCity.powerLevel;
 
         cityName.text = selectedCity.cityName;
+        cityName.GetComponent<TextProOnACircle>().m_forceUpdate = true;
         leaderName.text = FeudGameManager.Instance.gameCivilizations[selectedCity.civIndex].leaderName;
         cityParent.SetActive(true);
 
         UpdatePlayerStats();
 
         selectedCity.RevealCity();
+
+        if (!selectedCity.hasPlayerSeenLeader)
+        {
+            leaderQuestionMark.SetActive(true);
+            trustQuestionMark.SetActive(true);
+            civColorInCityView.color = Color.white;
+        }
+        else
+        {
+            leaderQuestionMark.SetActive(false);
+            trustQuestionMark.SetActive(false);
+            civColorInCityView.color = FeudGameManager.Instance.GetCiv(selectedCity.civIndex).mainColor;
+            SetLeaderSpriteColor(FeudGameManager.Instance.GetCiv(selectedCity.civIndex).mainColor);
+
+        }
+
         CloseSubPanles();
         subPanelOpen = false;
         tradingOpen = false;
     }
 
+    public void SetLeaderSpriteColor(Color color)
+    {
+        Material material = leaderSprite.material;
+        material.SetColor("_ColorChangeNewCol", color);
+        material.SetColor("_ColorChangeNewCol2", color);
+        leaderSprite.material = material;
+    }
+
     public void UpdatePlayerStats()
     {
-        playerGold.text = FeudGameManager.Instance.playerGold.ToString();
+        playerGold.text = FeudGameManager.Instance.Player().gold.ToString();
     }
     public void HideCity()
     {
@@ -244,6 +280,12 @@ public class CityView : MonoBehaviour
         tradingOpen = false;
         challengingOpen = false;
         cityParent.SetActive(false);
+    }
+
+    public void HideCityButton()
+    {
+        SI_CameraController.Instance.HideCity();
+        HideCity();
     }
 }
 

@@ -31,6 +31,8 @@ public class WorldCity : MonoBehaviour
     public TextMeshPro cityNameText;
     public int civIndex;
 
+    public bool hasPlayerSeenLeader;
+
     private void Start()
     {
         wiggler = GetComponent<Wiggler>();
@@ -101,8 +103,25 @@ public class WorldCity : MonoBehaviour
         // civReference = _civ;
         // UpdateTileColors(civReference.tileColor);
         civIndex = _civIndex;
-        UpdateTileColors(FeudGameManager.Instance.gameCivilizations[civIndex].tileColor);
+        if (civIndex > 0)
+        {
+            if (hasPlayerSeenLeader)
+            {
+                UpdateTileColors(FeudGameManager.Instance.gameCivilizations[civIndex].tileColor);
+            }
+        }
+        else
+        {
+            UpdateTileColors(FeudGameManager.Instance.gameCivilizations[civIndex].tileColor);
+        }
+      
 
+    }
+
+    public void LeaderRevealed()
+    {
+        hasPlayerSeenLeader = true;
+        UpdateTileColors(FeudGameManager.Instance.gameCivilizations[civIndex].tileColor);
     }
 
     public void RevealCity()

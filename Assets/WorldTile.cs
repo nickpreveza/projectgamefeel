@@ -227,7 +227,7 @@ public class WorldTile : MonoBehaviour, IHeapItem<WorldTile>
         foreach (WorldTile tile in foundCityTiles)
         {
             tile.cityObject = this.cityObject;
-            //tile.baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
+            tile.baseSprite.color = FeudGameManager.Instance.colors.unclaimedCityColor;
         }
 
         cityObject.GetComponent<WorldCity>().cityTiles = foundCityTiles;

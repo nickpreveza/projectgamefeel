@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 [System.Serializable]
 public class Civilization
@@ -28,7 +29,9 @@ public class Civilization
 
     public List<ItemType> wantedItems = new List<ItemType>();
     public List<ItemType> hatedItems = new List<ItemType>();
+    public List<int> knownCivs = new List<int>();
 
+    public int gold;
     public float Discount
     {
         get
@@ -51,11 +54,14 @@ public class Item
     public int buyValue;
     public int sellValue;
     public ItemType type;
+
     public int strRequirment;
     public int conRequirment;
     public int intRequirment;
 
-    public int attackSpeed;
+    public float attackSpeed;
+    public int damageOrDefense;
+
 
 }
 [System.Serializable]

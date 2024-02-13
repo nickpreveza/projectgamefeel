@@ -11,7 +11,7 @@ public class FeudGameManager : MonoBehaviour
     public bool arenaVisible; //debug
     public bool arenaOnGoing = false;
     [SerializeField] public Civilization[] gameCivilizations;
-    public int playerCivIndex;
+    public int playerCivInde = 0; //always 0
 
     public CityView cityManager;
   
@@ -20,12 +20,21 @@ public class FeudGameManager : MonoBehaviour
     //public PlayerData playerData = new PlayerData();
 
     public int startingGold = 100;
-    public int playerGold;
-
     
     public bool randomEncounters;
     public float baseEncounterChance;
     public float encounterChanceDecreaseFactor; //if had an ecnounter, half it. 
+
+    public List<Item> worldItems;
+    public Civilization GetCiv(int playerIndex)
+    {
+        return gameCivilizations[playerIndex];
+    }
+
+    public Civilization Player()
+    {
+        return gameCivilizations[0];
+    }
     void Awake()
     {
         Instance = this;   
@@ -72,7 +81,14 @@ public class FeudGameManager : MonoBehaviour
         unit.SpawnSetup(startingCity.parentTile);
 
         SI_CameraController.Instance.CenterCamera(unit.parentTile);
-        playerGold = startingGold;
+        Player().gold = startingGold;
+
+        for(int i = 0; i < gameCivilizations.Length; i++)
+        {
+            gameCivilizations[i].knownCivs.Add(i);
+        }
+
+        Player().ownedItems = new List<Item>(worldItems);
         //probably effect or whatever 
     }
 

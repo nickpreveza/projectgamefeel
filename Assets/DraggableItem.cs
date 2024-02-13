@@ -6,16 +6,18 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 {
     Vector3 startPos;
     [SerializeField] Image raycastItem; 
-    public Transform dragParent;
+    public Transform whileDragParent;
     public Transform originParent;
     public bool foundContainer;
     public Item item; //the button parent should set the item here 
     Vector3 currentPos;
     public GameObject parentButton;
+    public DraggedItemState state = DraggedItemState.ReturnToParent;
 
     void Start()
     {
         raycastItem = this.GetComponent<Image>();
+        originParent = this.transform.parent;
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -23,7 +25,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             return;
         }
-        transform.SetParent(dragParent);
+        transform.SetParent(whileDragParent);
         transform.SetAsLastSibling();
 
         raycastItem.raycastTarget = false;
@@ -43,10 +45,19 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnEndDrag(PointerEventData eventData)
     {
         raycastItem.raycastTarget = true;
-        //check
-        if (!foundContainer)
+        switch (state)
         {
-            transform.SetParent(originParent);
+            case DraggedItemState.ReturnToParent:
+                if (!foundContainer)
+                {
+                    transform.SetParent(originParent);
+                }
+            break;
+            case DraggedItemState.ReturnToStore:
+                break;
+            case DraggedItemState.ReturnToInventory:
+                break;
         }
+
     }
 }

@@ -27,7 +27,6 @@ public class DragTargetSlot : MonoBehaviour, IDropHandler
             animating = true;
             movedIcon = dropped;
             draggableItem.foundContainer = true;
-            draggableItem.dragParent = this.transform;
             draggableItem.transform.SetParent(this.transform);
             itemData = draggableItem.item;
             parentButton = draggableItem.parentButton;
@@ -52,15 +51,15 @@ public class DragTargetSlot : MonoBehaviour, IDropHandler
         }
         Destroy(movedIcon);
         handler.ItemGivenToLeader(itemData);
-      
 
+        yield return new WaitForSeconds(2f);
         while (boxCover.fillAmount > 0)
         {
             boxCover.fillAmount -= 0.1f * lidSpeed;
             yield return new WaitForFixedUpdate();
         }
 
-        yield return new WaitForSeconds(2f);
+       
         animating = false;
         handler.SetLeaderTextTradingDefault();
     }

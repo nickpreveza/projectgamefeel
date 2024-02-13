@@ -996,9 +996,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 561
-        y: 400
-        width: 47
-        height: 64
+        y: 401
+        width: 46
+        height: 62
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 9, y: 9, z: 9, w: 9}
@@ -1171,10 +1171,10 @@ TextureImporter:
       name: UI books & more_14
       rect:
         serializedVersion: 2
-        x: 720
-        y: 368
-        width: 48
-        height: 46
+        x: 721
+        y: 369
+        width: 46
+        height: 45
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 9, y: 9, z: 9, w: 7}
@@ -1193,10 +1193,10 @@ TextureImporter:
       name: UI books & more_15
       rect:
         serializedVersion: 2
-        x: 767
-        y: 367
-        width: 50
-        height: 50
+        x: 768
+        y: 368
+        width: 48
+        height: 48
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 7, y: 6, z: 7, w: 6}
