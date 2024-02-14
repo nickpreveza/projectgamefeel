@@ -50,7 +50,9 @@ public class StoreManager : MonoBehaviour
         sellTarget.UpdateValueIcons();
         buyTarget.UpdateValueIcons();
 
-        if (sellTarget.SellValue > 0)
+        int cost = buyTarget.BuyValue;
+
+        if (sellTarget.SellValue > 0 && FeudGameManager.Instance.CanPlayerAfford(cost))
         {
             makeOffer.interactable = true;
         }
@@ -64,14 +66,21 @@ public class StoreManager : MonoBehaviour
     {
         if (sellTarget.SellValue >= buyTarget.BuyValue) //something something about trust 
         {
-            Debug.Log("Success!");
-            buyTarget.AddItemsToUserInventory();
-            sellTarget.RemoveItemsFromUserInventory();
-            sellTarget.ClearBox();
-            buyTarget.ClearBox();
-            subtitleButton.text = positiveResponseToOffer;
+            if (FeudGameManager.Instance.TryToChargePlayer(buyTarget.BuyValue))
+            {
+                Debug.Log("Success!");
+                buyTarget.AddItemsToUserInventory();
+                sellTarget.RemoveItemsFromUserInventory();
+                sellTarget.ClearBox();
+                buyTarget.ClearBox();
+                subtitleButton.text = positiveResponseToOffer;
 
-            userInventory.ShowCollection(FeudGameManager.Instance.Player().ownedItems);
+                userInventory.ShowCollection(FeudGameManager.Instance.Player().ownedItems);
+            }
+            else
+            {
+                subtitleButton.text = "You don't have enough gold";
+            }
         }
         else
         {

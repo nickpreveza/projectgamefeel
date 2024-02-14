@@ -50,7 +50,9 @@ public class WorldUnit : MonoBehaviour
 
     public List<WorldTile> citiesInRange = new List<WorldTile> ();
 
-
+    public SpriteRenderer weaponSprite;
+    public SpriteRenderer shieldSprite;
+    [SerializeField] Animator animator;
     private void Start()
     {
         attackCharges = maxAttackCharges;
@@ -159,4 +161,11 @@ public class WorldUnit : MonoBehaviour
         UnitManager.Instance.ClearTileSelectMode();
         UnitManager.Instance.SelectUnit(this);
     }
+}
+
+public enum UnitState
+{
+    IDLE,
+    WALKINGTOWARDS,
+    ATTACKING
 }

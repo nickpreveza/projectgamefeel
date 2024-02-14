@@ -48,6 +48,7 @@ public class CityView : MonoBehaviour
     public bool tradingOpen = false;
     public bool challengingOpen = false;
     public bool storeOpen = false;
+    public bool armyOpen = false;
 
     [SerializeField] DragTargetSlot leaderGiftBox;
     [SerializeField] Image civColorInCityView;
@@ -102,6 +103,8 @@ public class CityView : MonoBehaviour
                 break;
             case CityStructureType.ARMY:
                 armyScreen.SetActive(true);
+                armyScreen.GetComponent<ArmyManager>().ShowArmy();
+                armyOpen = true;
                 break;
         }
     }
@@ -150,12 +153,18 @@ public class CityView : MonoBehaviour
             shopScreen.GetComponent<StoreManager>().HideStore();
         }
 
+        if (armyOpen)
+        {
+            armyScreen.GetComponent<ArmyManager>().HideArmy();
+        }
+
         if (subPanelOpen)
         {
             CloseSubPanles();
             tradingOpen = false;
             subPanelOpen = false;
             storeOpen = false;
+            armyOpen = false;
             ShowCity(selectedCity);
         }
     }
@@ -194,7 +203,7 @@ public class CityView : MonoBehaviour
 
     public void EnterCombatButton()
     {
-        FeudGameManager.Instance.StartArena(true);
+        FeudGameManager.Instance.StartArena(true, FeudGameManager.Instance.GetCiv(selectedCity.civIndex).formationUnits);
     }
 
     public void ShowTrading()

@@ -232,7 +232,7 @@ public class MapGenerator : MonoBehaviour
                         markedForRemoval.Add(tilesAvailableForCities[i]);
                         continue;
                     }
-                    Direction hexDirection = GetHexDirection(tilesAvailableForCities[i], tileToCheck);
+                    Direction hexDirection = GetTileDirection(tilesAvailableForCities[i], tileToCheck);
                     if (hexDirection == Direction.Right || hexDirection == Direction.Up || hexDirection == Direction.RightUp)
                     {
                         markedForRemoval.Add(tilesAvailableForCities[i]);
@@ -383,7 +383,7 @@ public class MapGenerator : MonoBehaviour
                 int newY = centerTile.posY + dy[i];
 
                 // Check if the new coordinates are within the bounds of the grid
-                if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapWidth)
+                if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapHeight)
                 {
                     // If within bounds, add the value of the adjacent tile to the list
                     adjacentTiles.Add(worldTiles[newX, newY]);
@@ -394,7 +394,7 @@ public class MapGenerator : MonoBehaviour
         return adjacentTiles;
     }
 
-    public Direction GetHexDirection(WorldTile origin, WorldTile target)
+    public Direction GetTileDirection(WorldTile origin, WorldTile target)
     {
         if (origin.posX == target.posX)
         {

@@ -95,6 +95,7 @@ public class SI_CameraController : MonoBehaviour
     public float cameraReturnDelay = 0.1f;
 
     public bool tileSelectMode;
+    public bool arenaRunning;
     void Awake()
     {
         if (Instance == null)
@@ -137,7 +138,8 @@ public class SI_CameraController : MonoBehaviour
 
     public void ShowAreanView(bool fromCity, WorldTile targetTile = null)
     {
-        controlsLocked = true;
+        //controlsLocked = true;
+        arenaRunning = true;
         worldViewVirtualCamera.gameObject.SetActive(false);
         cityViewVirtualCamera.gameObject.SetActive(false);
         cityViewTransitionVirtualCamera.gameObject.SetActive(false);
@@ -162,6 +164,7 @@ public class SI_CameraController : MonoBehaviour
 
     public void HideArena(bool activeCityView)
     {
+        arenaRunning = false;
         arenaViewCamera.gameObject.SetActive(false);
         cityViewVirtualCamera.gameObject.SetActive(false);
         mainCamera.cullingMask = gameLayerMask;
@@ -247,6 +250,14 @@ public class SI_CameraController : MonoBehaviour
 
         if (controlsLocked)
         {
+            if (arenaRunning)
+            {
+               if (Input.GetMouseButtonDown(0))
+                {
+                    WorldTile arenaTile = ArenaView.Instance.GetTile(GetMouseWorldPosition());
+                    Debug.Log(arenaTile.name);
+                }
+            }
             return;
         }
 
@@ -334,7 +345,7 @@ public class SI_CameraController : MonoBehaviour
                 return;
             }
 
-            Update_Tap(); 
+            ClickFunction(); 
         }
         else if (Input.GetMouseButton(0) && (Vector3.Distance(Input.mousePosition, lastMousePosition) > mouseDragThreshold))
         {
@@ -410,7 +421,7 @@ public class SI_CameraController : MonoBehaviour
         this.transform.position = ClampCamera(this.transform.position);
     }
 
-    void Update_Tap()
+    void ClickFunction()
     {
         if (IsPointerOverUIObject())
         {
@@ -422,6 +433,7 @@ public class SI_CameraController : MonoBehaviour
         {
             return;
         }
+
 
         WorldTile tile = MapGenerator.Instance.GetTile(GetMouseWorldPosition());
 

@@ -4,4 +4,6 @@ using UnityEngine;
 public class ItemScriptable : ScriptableObject
 {
     public Item item;
+    public ItemScriptable weapon;
+    public ItemScriptable shield;
 }

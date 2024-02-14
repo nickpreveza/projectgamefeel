@@ -25,7 +25,10 @@ public class FeudGameManager : MonoBehaviour
     public float baseEncounterChance;
     public float encounterChanceDecreaseFactor; //if had an ecnounter, half it. 
 
- 
+    public int availableStoreItems = 4;
+    public int availableStoreUnits = 4;
+
+    public List<EnemyEncounter> randomEnemyCombinations = new List<EnemyEncounter>();
     public Civilization GetCiv(int playerIndex)
     {
         return gameCivilizations[playerIndex];
@@ -54,7 +57,8 @@ public class FeudGameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                ViewCity(false);
+                CityView.Instance.BackButton();
+                //ViewCity(false);
             }
         }
 
@@ -90,19 +94,64 @@ public class FeudGameManager : MonoBehaviour
             foreach(ItemScriptable itemScriptable in gameCivilizations[i].storeItemsBase)
             {
                 Item item = new Item();
-                item.SetData(itemScriptable.item);
+                item.SetData(itemScriptable);
                 gameCivilizations[i].storeItemsPool.Add(item);
             }
 
             foreach (ItemScriptable itemScriptable in gameCivilizations[i].startingItemsBase)
             {
                 Item item = new Item();
-                item.SetData(itemScriptable.item);
+                item.SetData(itemScriptable);
                 gameCivilizations[i].ownedItems.Add(item);
             }
 
+            foreach (ItemScriptable itemScriptable in gameCivilizations[i].storeUnitsBase)
+            {
+                Item item = new Item();
+                item.SetData(itemScriptable);
+                gameCivilizations[i].storeUnitsPool.Add(item);
+            }
+
+            foreach (ItemScriptable itemScriptable in gameCivilizations[i].startingUnitsBase)
+            {
+                Item item = new Item();
+                item.SetData(itemScriptable);
+
+                if (gameCivilizations[i].formationUnits.Count < 9)
+                {
+                    gameCivilizations[i].formationUnits.Add(item);
+                }
+               
+            }
         }
         //probably effect or whatever 
+    }
+
+
+    public bool CanPlayerAfford(int cost)
+    {
+        if (Player().gold >= cost)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool TryToChargePlayer(int cost)
+    {
+        if (CanPlayerAfford(cost))
+        {
+            Player().gold -= cost;
+            CityView.Instance.UpdatePlayerStats();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void RefreshStoreItems(int civIndex)
@@ -110,14 +159,34 @@ public class FeudGameManager : MonoBehaviour
         List<Item> itemPool = new List<Item>(gameCivilizations[civIndex].storeItemsPool);
         List<Item> selectedStoreItems = new List<Item>();
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < availableStoreItems; i++)
         {
+            if (itemPool.Count == 0)
+            {
+                break;
+            }
             int selectedIndex = Random.Range(0, itemPool.Count);
             selectedStoreItems.Add(itemPool[selectedIndex]);
             itemPool.Remove(itemPool[selectedIndex]);
         }
 
         gameCivilizations[civIndex].selectedStoreItems = selectedStoreItems;
+
+        List<Item> unitPool = new List<Item>(gameCivilizations[civIndex].storeUnitsPool);
+        List<Item> selectedUnits = new List<Item>();
+
+        for (int i = 0; i < availableStoreUnits; i++)
+        {
+            if (unitPool.Count == 0)
+            {
+                break;
+            }
+            int selectedIndex = Random.Range(0, unitPool.Count);
+            selectedUnits.Add(unitPool[selectedIndex]);
+            unitPool.RemoveAt(selectedIndex);
+        }
+
+        gameCivilizations[civIndex].selectedStoreUnits = selectedUnits;
     }
 
     public void ViewCity(bool show, WorldTile city = null)
@@ -143,16 +212,29 @@ public class FeudGameManager : MonoBehaviour
         }
     }
 
-    public void StartArena(bool fromCity, WorldTile origin = null)
+    public List<Item> GetRandomEncounter()
+    {
+        int randomIndex = Random.Range(0, randomEnemyCombinations.Count);
+        return randomEnemyCombinations[randomIndex].unitsToSpawn;
+    }
+    public void StartArena(bool fromCity, List<Item> enemyUnits, WorldTile origin = null)
     {
         arenaVisible = true;
+        ArenaView.Instance.GenerateArena(Player().formationUnits, enemyUnits);
         SI_CameraController.Instance.ShowAreanView(fromCity, origin);
     }
 
     public void CloseArena()
     {
         arenaVisible = false;
+        ArenaView.Instance.ClearArena();
         UnitManager.Instance.runningArenaCombat = false;
         SI_CameraController.Instance.HideArena(cityVisible);
     }
+}
+
+[SerializeField]
+public class EnemyEncounter
+{
+    public List<Item> unitsToSpawn;
 }

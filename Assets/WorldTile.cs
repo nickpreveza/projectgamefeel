@@ -79,6 +79,14 @@ public class WorldTile : MonoBehaviour, IHeapItem<WorldTile>
         return -compare;
     }
 
+    public void SetDataArena(int x, int y, float cellSize)
+    {
+        this.name = "ArenaTile:" + x + "," + y;
+        posX = x;
+        posY = y;
+        //baseSprite.color = newColor; 
+    }
+
     public void SetData(int x, int y, Color newColor, float _elevation, float cellSize, TileType _type, TerrainType _terrain)
     {
         terrain = _terrain;

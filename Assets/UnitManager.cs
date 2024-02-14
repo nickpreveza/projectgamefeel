@@ -213,7 +213,7 @@ public class UnitManager : MonoBehaviour
                 {
                     runningArenaCombat = true;
                     totalEncountersInPath++;
-                    FeudGameManager.Instance.StartArena(false, pathStep);
+                    FeudGameManager.Instance.StartArena(false, FeudGameManager.Instance.GetRandomEncounter(), pathStep);
 
                     while (runningArenaCombat)
                     {

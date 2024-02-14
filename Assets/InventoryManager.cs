@@ -11,11 +11,17 @@ public class InventoryManager : MonoBehaviour, IDropHandler
     public List<Item> itemsToDisplay = new List<Item>();
     [SerializeField] Transform canvasDraggableParent;
     public List<Item> refList = new List<Item>();
-    public ItemMoveTarget localMoveTarget;
-    public ItemMoveTarget moveTargetToSet;
+
+    public ItemMoveTarget parentType;
+    public ItemMoveTarget sendTarget;
 
     [SerializeField] StoreManager handler;
+    [SerializeField] ArmyManager armyHandler;
+
     [SerializeField] GameObject emptyDisclaimer;
+
+    public bool armyMode;
+
     public void AddItem(Item item, bool setAsFirstSibling, bool refreshVisual)
     {
         if (setAsFirstSibling)
@@ -63,7 +69,8 @@ public class InventoryManager : MonoBehaviour, IDropHandler
         foreach (Item item in itemsToDisplay)
         {
             GameObject obj = Instantiate(buttonPrefab, contentParent);
-            obj.GetComponent<InventoryItem>().SetData(this, item, canvasDraggableParent);
+            obj.GetComponent<InventoryItem>().SetData(this, item, canvasDraggableParent, armyMode);
+
         }
     }
 
@@ -91,7 +98,7 @@ public class InventoryManager : MonoBehaviour, IDropHandler
 
         if (draggableItem != null)
         {
-            if (draggableItem.moveTarget != localMoveTarget)
+            if (draggableItem.GetSendType != parentType)
             {
                 return;
             }
@@ -100,7 +107,16 @@ public class InventoryManager : MonoBehaviour, IDropHandler
 
             Destroy(draggableItem.gameObject);
 
-            handler.UpdateOfferButton();
+            if (!armyMode)
+            {
+                handler.UpdateOfferButton();
+            }
+            else
+            {
+                armyHandler.UpdateBuyButton();
+            }
+
+           
         }
     }
 

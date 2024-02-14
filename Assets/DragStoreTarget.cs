@@ -1,12 +1,18 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
 public class DragStoreTarget : MonoBehaviour, IDropHandler
 {
     bool animating;
-    public ItemMoveTarget returnMoveTarget;
-    public ItemMoveTarget localMoveTarget;
+    public bool armyMode;
+    public bool allowSwitch;
+
+    public ItemMoveTarget parentType;
+    public ItemMoveTarget sendTarget;
+    //public ItemMoveTarget acceptTarget;
+
     [SerializeField] Transform dragItemsParent;
     [SerializeField] int maxItemsInContainer = 10;
     public bool hasItemsToReturn;
@@ -16,6 +22,25 @@ public class DragStoreTarget : MonoBehaviour, IDropHandler
     [SerializeField] TextMeshProUGUI valueText;
     [SerializeField] GameObject valueIcon;
     public StoreManager handler;
+    public ArmyManager armyHandler;
+
+    public GameObject holdingItem;
+    
+    public DraggableItem unitDraggable
+    {
+        get
+        {
+            if (dragItemsParent.transform.childCount > 0)
+            {
+                return dragItemsParent.GetChild(0).GetComponent<DraggableItem>();
+            }
+            else
+            {
+                return null;
+            }
+         
+        }
+    }
 
     public void AddItemsToUserInventory()
     {
@@ -94,7 +119,12 @@ public class DragStoreTarget : MonoBehaviour, IDropHandler
 
     public void UpdateValueIcons()
     {
-        if (localMoveTarget == ItemMoveTarget.SELLBOX)
+        if (armyMode)
+        {
+            return;
+        }
+
+        if (parentType == ItemMoveTarget.SELLBOX)
         {
             int sellValue = SellValue;
             if (sellValue > 0)
@@ -107,7 +137,7 @@ public class DragStoreTarget : MonoBehaviour, IDropHandler
                 valueIcon.SetActive(false);
             }
         }
-        else if (localMoveTarget == ItemMoveTarget.BUYBOX)
+        else if (parentType == ItemMoveTarget.BUYBOX)
         {
             int value = BuyValue;
             if (value > 0)
@@ -121,6 +151,40 @@ public class DragStoreTarget : MonoBehaviour, IDropHandler
             }
         }
     }
+
+    public void ScriptDrop(GameObject prefab, Item item, Transform dragParent)
+    {
+        if (dragItemsParent.childCount >= maxItemsInContainer)
+        {
+            foreach(Transform child in dragItemsParent)
+            {
+                Destroy(child);
+            }
+        }
+
+
+        GameObject dropped = Instantiate(prefab, dragItemsParent);
+        holdingItem = dropped;
+        DraggableItem draggableItem = dropped.GetComponent<DraggableItem>();
+
+        draggableItem.SetUpUnit(item, dragParent, parentType, sendTarget);
+        draggableItem.originParent = dragItemsParent;
+        draggableItem.transform.SetParent(dragItemsParent);
+
+        if (draggableItem.handler != null)
+        {
+            draggableItem.handler.RemoveItem(draggableItem.item, true);
+        }
+
+        if (draggableItem.parentButton != null)
+        {
+            Destroy(draggableItem.parentButton);
+        }
+
+        dropped.transform.SetAsLastSibling();
+        armyHandler.UpdateBuyButton();
+    }
+
     public void OnDrop(PointerEventData eventData)
     {
         if (animating)
@@ -128,9 +192,12 @@ public class DragStoreTarget : MonoBehaviour, IDropHandler
             return;
         }
 
-        if (dragItemsParent.childCount >= 10)
+        if (dragItemsParent.childCount >= maxItemsInContainer)
         {
-            return;
+            if (!allowSwitch)
+            {
+                return;
+            }
         }
 
         GameObject dropped = eventData.pointerDrag;
@@ -138,37 +205,87 @@ public class DragStoreTarget : MonoBehaviour, IDropHandler
 
         if (draggableItem != null)
         {
-            if (draggableItem.moveTarget != localMoveTarget)
+            if (draggableItem.GetSendType == ItemMoveTarget.STORE && parentType == ItemMoveTarget.BUYBOX)
+            {
+                //here should be function to allow switch between buy boxes
+            }
+
+            if (draggableItem.GetSendType != parentType)
             {
                 return;
             }
 
-            hasItemsToReturn = true;
+            if (armyMode)
+            {
+                draggableItem.GetComponent<RectTransform>().localScale = Vector3.one;
 
-            draggableItem.moveTarget = returnMoveTarget;
+                if (parentType == ItemMoveTarget.STORAGE && allowSwitch && dragItemsParent.childCount > 0  && draggableItem.GetSendType == parentType)
+                {
+                    DraggableItem localDraggable = dragItemsParent.GetChild(0).GetComponent<DraggableItem>();
 
-            //draggableItem.foundContainer = true;
-            draggableItem.originParent = dragItemsParent;
-            draggableItem.transform.SetParent(dragItemsParent);
+                    if (localDraggable != null && localDraggable != draggableItem && localDraggable.GetSendType == ItemMoveTarget.STORAGE)
+                    {
+                        Transform parentToSwitch = draggableItem.originParent;
+                        draggableItem.ForceMove(dragItemsParent);
+                        localDraggable.ForceMove(parentToSwitch);
+                    }
 
-            draggableItem.handler.RemoveItem(draggableItem.item, true);
-            hasItemsToReturn = true;
-            if (draggableItem.parentButton != null)
-            Destroy(draggableItem.parentButton);
 
-            dropped.transform.SetAsLastSibling();
-            
-            handler.UpdateOfferButton();
+                    return;
+                }
+        
+                if (draggableItem.GetParentType == ItemMoveTarget.STORE)
+                {
+                    hasItemsToReturn = true;
 
-            UpdateValueIcons();
+                    //uncsry
+                    sendTarget = ItemMoveTarget.STORE;
+                    draggableItem.handler.RemoveItem(draggableItem.item, true);
+                }
+                else
+                {
+                    hasItemsToReturn = false;
+                    //sendTarget = ItemMoveTarget.BUYBOX;
+                }
+
+                draggableItem.SetUpOriginAndTarget(parentType, sendTarget);
+
+                draggableItem.originParent = dragItemsParent;
+                draggableItem.transform.SetParent(dragItemsParent);
+
+                if (draggableItem.parentButton != null)
+                {
+                    Destroy(draggableItem.parentButton);
+                }
+
+                dropped.transform.SetAsLastSibling();
+
+                armyHandler.UpdateBuyButton();
+
+            }
+            else
+            {
+                hasItemsToReturn = true;
+
+                draggableItem.SetUpOriginAndTarget(parentType, sendTarget);
+
+                //draggableItem.foundContainer = true;
+                draggableItem.originParent = dragItemsParent;
+                draggableItem.transform.SetParent(dragItemsParent);
+
+                draggableItem.handler.RemoveItem(draggableItem.item, true);
+               
+                if (draggableItem.parentButton != null)
+                    Destroy(draggableItem.parentButton);
+
+                dropped.transform.SetAsLastSibling();
+
+                handler.UpdateOfferButton();
+
+                UpdateValueIcons();
+            }
+          
         }
     }
 }
 
-
-public enum DraggedItemState
-{
-    ReturnToInventory,
-    ReturnToStore,
-    ReturnToParent
-}

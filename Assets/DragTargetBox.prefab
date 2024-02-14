@@ -255,3 +255,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handler: {fileID: 0}
+  boxCover: {fileID: 0}
+  lidSpeed: 1

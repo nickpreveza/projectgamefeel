@@ -9,4 +9,9 @@ public class UniversalColors : MonoBehaviour
     public Color friendly;
     public Color power;
     public Color roadColor;
+
+    public Color strColor;
+    public Color conColor;
+    public Color dexColor;
+    public Color disableStatColor;
 }
