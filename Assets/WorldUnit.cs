@@ -140,6 +140,24 @@ public class WorldUnit : MonoBehaviour
         }
     }
 
+    public void ArenaSpawn(WorldTile startParent)
+    {
+        parentTile = startParent;
+
+        oldPosition = newPosition = this.transform.position;
+
+        //setup stuff
+
+        posX = parentTile.posX;
+        posY = parentTile.posY;
+
+        parentTile.UnitIn(this);
+
+        attackCharges = maxAttackCharges;
+        movePoints = maxMovePoints;
+
+    }
+
     public void SpawnSetup(WorldTile startParent)
     {
         parentTile = startParent;

@@ -2965,6 +2965,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!1 &420157676
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 420157677}
+  m_Layer: 0
+  m_Name: UnitParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &420157677
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420157676}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 960546985}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &442713685
 GameObject:
   m_ObjectHideFlags: 0
@@ -8534,6 +8565,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 991889701}
+  - {fileID: 420157677}
   - {fileID: 393452749}
   - {fileID: 203202823}
   - {fileID: 1163939926}
@@ -17693,6 +17725,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
         type: 3}
+      propertyPath: randomEnemyCombinations.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
       propertyPath: worldItems.Array.data[0].sellValue
       value: 1
       objectReference: {fileID: 0}
@@ -19005,6 +19042,11 @@ PrefabInstance:
         type: 2}
     - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
         type: 3}
+      propertyPath: randomEnemyCombinations.Array.data[0].unitsToSpawn.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
       propertyPath: 'gameCivilizations.Array.data[0].startingItemsBase.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: ae9382a18414ff042bae0dfcffc28540,
@@ -19291,6 +19333,34 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 6af8de5b7a553a3489057b28c5e546e6,
         type: 2}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
+      propertyPath: 'randomEnemyCombinations.Array.data[0].unitsToSpawn.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: be6671ddfa5440b44851ecda5e909581,
+        type: 2}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
+      propertyPath: 'randomEnemyCombinations.Array.data[0].unitsToSpawn.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c53270e3d64934740bada4e1a692b095,
+        type: 2}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
+      propertyPath: 'randomEnemyCombinations.Array.data[0].unitsToSpawn.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 6af8de5b7a553a3489057b28c5e546e6,
+        type: 2}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
+      propertyPath: randomEnemyCombinations.Array.data[0].unitsToSpawn.Array.data[1].invalidated
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7416399403945028694, guid: cfca335f24311d34d9d7d8a184b692d5,
+        type: 3}
+      propertyPath: randomEnemyCombinations.Array.data[0].unitsToSpawn.Array.data[2].invalidated
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -19746,6 +19816,17 @@ PrefabInstance:
       propertyPath: tilePrefab
       value: 
       objectReference: {fileID: 186203867492566318, guid: c4f7c6a8416c8304ba493e531c4bc937,
+        type: 3}
+    - target: {fileID: 6015219222138788578, guid: 0fa778c62cffd8a47b0ce49bda471c94,
+        type: 3}
+      propertyPath: unitParent
+      value: 
+      objectReference: {fileID: 420157677}
+    - target: {fileID: 6015219222138788578, guid: 0fa778c62cffd8a47b0ce49bda471c94,
+        type: 3}
+      propertyPath: unitPrefab
+      value: 
+      objectReference: {fileID: 2391898754211441776, guid: f6e81bba8f1993548bd97f1e83266a28,
         type: 3}
     - target: {fileID: 6015219222138788578, guid: 0fa778c62cffd8a47b0ce49bda471c94,
         type: 3}

@@ -215,7 +215,12 @@ public class FeudGameManager : MonoBehaviour
     public List<Item> GetRandomEncounter()
     {
         int randomIndex = Random.Range(0, randomEnemyCombinations.Count);
-        return randomEnemyCombinations[randomIndex].unitsToSpawn;
+        List<Item> unitsToSpawn = new List<Item>();
+        foreach(ItemScriptable scriptable in randomEnemyCombinations[randomIndex].unitsToSpawn)
+        {
+            unitsToSpawn.Add(scriptable.item);
+        }
+        return unitsToSpawn;
     }
     public void StartArena(bool fromCity, List<Item> enemyUnits, WorldTile origin = null)
     {
@@ -233,8 +238,8 @@ public class FeudGameManager : MonoBehaviour
     }
 }
 
-[SerializeField]
+[System.Serializable]
 public class EnemyEncounter
 {
-    public List<Item> unitsToSpawn;
+    public List<ItemScriptable> unitsToSpawn = new List<ItemScriptable>();
 }

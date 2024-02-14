@@ -21,6 +21,7 @@ public class ArenaView : MonoBehaviour
     public List<Vector2> enemyPosition = new List<Vector2>();
 
     public Transform tileParent;
+    public Transform unitParent;
     public WorldTile[,] arenaTiles;
 
     public List<WorldTile> playerSpawnPositions = new List<WorldTile>();
@@ -41,12 +42,12 @@ public class ArenaView : MonoBehaviour
         Instance = this;
     }
 
-    public void GenerateArena(List<Item> playerUnits, List<Item> enemyUnits)
+    public void GenerateArena(List<Item> _playerUnits, List<Item> _enemyUnits)
     {
         ClearArena();
 
-        playerUnits = new List<Item>(playerUnits);
-        enemyUnits = new List<Item>(enemyUnits);
+        playerUnits = new List<Item>(_playerUnits);
+        enemyUnits = new List<Item>(_enemyUnits);
 
         arenaTiles = new WorldTile[mapWidth, mapHeight];
 
@@ -75,7 +76,18 @@ public class ArenaView : MonoBehaviour
 
         for (int i = 0; i < playerUnits.Count; i++)
         {
+            if (!playerUnits[i].invalidated) 
             SpawnUnit(i, true);
+        }
+    }
+
+
+    void SpawnEnemyUnits()
+    {
+        for (int i = 0; i < enemyUnits.Count; i++)
+        {
+            if (!enemyUnits[i].invalidated)
+                SpawnUnit(i, false);
         }
     }
 
@@ -103,22 +115,21 @@ public class ArenaView : MonoBehaviour
         }
 
         WorldUnit unit = obj.GetComponent<WorldUnit>();
-        unit.SpawnSetup(arenaTiles[spawnCoords.x, spawnCoords.y]);
+        obj.transform.SetParent(unitParent);
+        unit.ArenaSpawn(arenaTiles[spawnCoords.x, spawnCoords.y]);
     }
 
-    void SpawnEnemyUnits()
-    {
-        for (int i = 0; i < enemyUnits.Count; i++)
-        {
-
-        }
-    }
 
     public void ClearArena()
     {
         while (tileParent.childCount > 0)
         {
             Destroy(tileParent.GetChild(0).gameObject);
+        }
+
+        while (unitParent.childCount > 0)
+        {
+            Destroy(unitParent.GetChild(0).gameObject);
         }
     }
 
