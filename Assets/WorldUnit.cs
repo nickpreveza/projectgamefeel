@@ -52,10 +52,25 @@ public class WorldUnit : MonoBehaviour
 
     public SpriteRenderer weaponSprite;
     public SpriteRenderer shieldSprite;
+    public SpriteRenderer unitSprite;
     [SerializeField] Animator animator;
 
     public Item item;
     public ArenaView arenaHandler;
+
+    public float attackSpeed;
+    public float moveSpeed;
+    public int damage;
+    public int health;
+    public int armor;
+    public bool hasWeapon;
+    public bool hasShield;
+
+    public bool hasTarget;
+    public bool hasBeenTargeted;
+
+    UnitState state = UnitState.IDLE;
+    bool stateChanged = true;
 
     private void Start()
     {
@@ -128,36 +143,25 @@ public class WorldUnit : MonoBehaviour
             buttonActionPossible = false;
         }
 
-        UpdateVisuals();
+        //pdateVisuals();
     }
 
-    public void UpdateVisuals()
-    {
-        //you can further optimize this ez
-        if (isInteractable)
-        {
-            
-        }
-        else
-        {
-           
-        }
-    }
 
-    public void ArenaSpawn(ArenaView _handler, WorldTile startParent)
+    public void ArenaSpawn(ArenaView _handler, WorldTile startParent, Item _item)
     {
-        if (item.invalidated)
+        if (_item.invalidated)
         {
             Debug.LogError("Spawned dead unit");
             return;
         }
 
+        item = _item;
         arenaHandler = _handler;
 
        
         parentTile = startParent;
 
-        oldPosition = newPosition = this.transform.position;
+       
 
         //setup stuff
 
@@ -169,6 +173,100 @@ public class WorldUnit : MonoBehaviour
         attackCharges = maxAttackCharges;
         movePoints = maxMovePoints;
 
+        transform.position = new Vector3(posX, posY, 0);
+        oldPosition = newPosition = this.transform.position;
+        if (item.weapon != null)
+        {
+            weaponSprite.sprite = item.weapon.icon;
+            hasWeapon = true;
+        }
+        else
+        {
+            weaponSprite.gameObject.SetActive(false);
+            hasWeapon = false;
+        }
+        if (item.shield != null)
+        {
+            shieldSprite.sprite = item.shield.icon;
+            hasShield = true;
+        }
+        else
+        {
+            shieldSprite.gameObject.SetActive(false);
+            hasShield = false;
+        }
+
+        unitSprite.sprite = item.icon;
+
+        moveSpeed = item.moveSpeed;
+        attackSpeed = item.attackSpeed;
+
+        damage = item.strRequirment;
+        //dex speed 
+        health = 5;
+        armor = item.conRequirment;
+
+        if (hasShield)
+        {
+            armor += item.shield.damageOrDefense;
+        }
+
+        if (hasWeapon)
+        {
+            damage += item.weapon.damageOrDefense;
+        }
+
+        StartCoroutine(ArenaBrain());
+
+    }
+
+    public IEnumerator ArenaBrain()
+    {
+        state = UnitState.IDLE;
+
+        switch (state)
+        {
+            case UnitState.IDLE:
+                //if no target in range, idle, and search
+                if (stateChanged)
+                {
+                    animator.SetBool("ATTACKING", false);
+                    animator.SetBool("IDLE", true);
+                    stateChanged = false;
+                   
+                }
+
+                if (hasTarget)
+                {
+                    state = UnitState.WALKINGTOWARDS;
+                    stateChanged = true;
+                    StartCoroutine(ArenaBrain());
+                }
+                break;
+            case UnitState.ATTACKING:
+
+                if (stateChanged)
+                {
+                    animator.SetBool("IDLE", false);
+                    animator.SetBool("ATTACKING", true);
+                    stateChanged = false;
+
+                }
+
+
+                if (!hasTarget)
+                {
+                    state = UnitState.IDLE;
+                    stateChanged = true;
+                    StartCoroutine(ArenaBrain());
+                }
+                //if target is dead and stop and switch to searching
+                break;
+            case UnitState.WALKINGTOWARDS:
+                //if target is next tile then stop and switch to attacking
+                break;
+        }
+        yield return new WaitForEndOfFrame();
     }
 
     public void SpawnSetup(WorldTile startParent)
@@ -197,6 +295,7 @@ public class WorldUnit : MonoBehaviour
 public enum UnitState
 {
     IDLE,
+    SEARCHING,
     WALKINGTOWARDS,
     ATTACKING
 }

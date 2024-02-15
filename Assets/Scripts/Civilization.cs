@@ -83,6 +83,7 @@ public class Item
     public int dexRequirment;
 
     public float attackSpeed;
+    public float moveSpeed;
     public int damageOrDefense;
 
     public Item weapon;
@@ -101,6 +102,7 @@ public class Item
         conRequirment = scripitable.item.conRequirment;
         dexRequirment = scripitable.item.dexRequirment;
 
+        moveSpeed = scripitable.item.moveSpeed;
         attackSpeed = scripitable.item.attackSpeed;
         damageOrDefense = scripitable.item.damageOrDefense;
 

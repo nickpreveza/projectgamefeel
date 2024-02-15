@@ -21,8 +21,9 @@ MonoBehaviour:
     type: 11
     strRequirment: 1
     conRequirment: 1
-    intRequirment: 1
+    dexRequirment: 0
     attackSpeed: 1
+    moveSpeed: 0
     damageOrDefense: 1
-  weapon: {fileID: 0}
-  shield: {fileID: 11400000, guid: dc23013340aa67e42a705e9fa31b1cc0, type: 2}
+  weapon: {fileID: 11400000, guid: dc23013340aa67e42a705e9fa31b1cc0, type: 2}
+  shield: {fileID: 11400000, guid: 24d47bfd6eb397242aab2b0d9903a381, type: 2}

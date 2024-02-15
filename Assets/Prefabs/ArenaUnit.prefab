@@ -125,6 +125,24 @@ MonoBehaviour:
   citiesInRange: []
   weaponSprite: {fileID: 8349280329651025317}
   shieldSprite: {fileID: 6465675721591747409}
+  unitSprite: {fileID: 4902753163408206118}
+  animator: {fileID: 6868477380815054829}
+  item:
+    invalidated: 0
+    id: 
+    icon: {fileID: 0}
+    buyValue: 0
+    sellValue: 0
+    type: 0
+    strRequirment: 0
+    conRequirment: 0
+    dexRequirment: 0
+    attackSpeed: 0
+    moveSpeed: 0
+    damageOrDefense: 0
+  arenaHandler: {fileID: 0}
+  attackSpeed: 0
+  moveSpeed: 0
 --- !u!95 &6868477380815054829
 Animator:
   serializedVersion: 7

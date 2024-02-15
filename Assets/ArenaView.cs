@@ -77,7 +77,7 @@ public class ArenaView : MonoBehaviour
         for (int i = 0; i < playerUnits.Count; i++)
         {
             if (!playerUnits[i].invalidated) 
-            SpawnUnit(i, true);
+            SpawnUnit(i, true, playerUnits[i]);
         }
     }
 
@@ -87,11 +87,11 @@ public class ArenaView : MonoBehaviour
         for (int i = 0; i < enemyUnits.Count; i++)
         {
             if (!enemyUnits[i].invalidated)
-                SpawnUnit(i, false);
+                SpawnUnit(i, false, enemyUnits[i]);
         }
     }
 
-    public void SpawnUnit(int index, bool isPlayer)
+    public void SpawnUnit(int index, bool isPlayer, Item _item)
     {
         Vector2Int spawnCoords = new Vector2Int();
 
@@ -119,7 +119,7 @@ public class ArenaView : MonoBehaviour
             unit.item = enemyUnits[index];
         }
 
-        //unit.ArenaSpawn(arenaTiles[spawnCoords.x, spawnCoords.y]);
+        unit.ArenaSpawn(this, arenaTiles[spawnCoords.x, spawnCoords.y], _item);
     }
 
     public void OnUnitKilled(WorldUnit unit)
