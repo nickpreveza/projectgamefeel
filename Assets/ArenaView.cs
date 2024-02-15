@@ -105,18 +105,47 @@ public class ArenaView : MonoBehaviour
 
         }
         GameObject obj = Instantiate(unitPrefab, arenaTiles[spawnCoords.x, spawnCoords.y].transform.position, Quaternion.identity);
+        WorldUnit unit = obj.GetComponent<WorldUnit>();
+        obj.transform.SetParent(unitParent);
+
         if (isPlayer)
         {
             activePlayerUnits.Add(obj);
+            unit.item = playerUnits[index];
         }
         else
         {
             activeEnemyUnits.Add(obj);
+            unit.item = enemyUnits[index];
         }
 
-        WorldUnit unit = obj.GetComponent<WorldUnit>();
-        obj.transform.SetParent(unitParent);
-        unit.ArenaSpawn(arenaTiles[spawnCoords.x, spawnCoords.y]);
+        //unit.ArenaSpawn(arenaTiles[spawnCoords.x, spawnCoords.y]);
+    }
+
+    public void OnUnitKilled(WorldUnit unit)
+    {
+        if (unit == null )
+        {
+            Debug.LogWarning("Tried to register unit after deletion");
+            return;
+        }
+
+        if (activePlayerUnits.Contains(unit.gameObject))
+        {
+            if (playerUnits.Contains(unit.item))
+            {
+
+            }
+            unit.gameObject.SetActive(false);
+        }
+        else if (activeEnemyUnits.Contains(unit.gameObject))
+        {
+            unit.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("Registered unit was not found in eitehlist");
+        }
     }
 
 

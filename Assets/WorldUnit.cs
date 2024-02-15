@@ -53,6 +53,10 @@ public class WorldUnit : MonoBehaviour
     public SpriteRenderer weaponSprite;
     public SpriteRenderer shieldSprite;
     [SerializeField] Animator animator;
+
+    public Item item;
+    public ArenaView arenaHandler;
+
     private void Start()
     {
         attackCharges = maxAttackCharges;
@@ -140,8 +144,17 @@ public class WorldUnit : MonoBehaviour
         }
     }
 
-    public void ArenaSpawn(WorldTile startParent)
+    public void ArenaSpawn(ArenaView _handler, WorldTile startParent)
     {
+        if (item.invalidated)
+        {
+            Debug.LogError("Spawned dead unit");
+            return;
+        }
+
+        arenaHandler = _handler;
+
+       
         parentTile = startParent;
 
         oldPosition = newPosition = this.transform.position;
