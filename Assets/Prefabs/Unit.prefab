@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4360572535464518484}
   - component: {fileID: 6868477380815054829}
   m_Layer: 9
-  m_Name: ArenaUnit
+  m_Name: Unit
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,6 +103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa4ce39879c438241866f51fc996926d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lookUp: 0
   posX: 0
   posY: 0
   oldPosition: {x: 0, y: 0}
@@ -143,6 +144,27 @@ MonoBehaviour:
   arenaHandler: {fileID: 0}
   attackSpeed: 0
   moveSpeed: 0
+  damage: 0
+  health: 0
+  armor: 0
+  hasWeapon: 0
+  hasShield: 0
+  hasTargetRight: 0
+  hasTargetLeft: 0
+  hasBeenTargetedLeft: 0
+  hasBeenTargetedRight: 0
+  playerGroup: 0
+  state: 0
+  unitIndex: 0
+  targetUnit: {fileID: 0}
+  targetTile: {fileID: 0}
+  pathToTarget: []
+  searchingTarget: 0
+  leftAttacker: {fileID: 0}
+  rightAttacker: {fileID: 0}
+  debugOverrideHealth: 10
+  internalAttackTimer: 0
+  attacklenghtMultipler: 1
 --- !u!95 &6868477380815054829
 Animator:
   serializedVersion: 7
@@ -176,7 +198,6 @@ GameObject:
   - component: {fileID: 7199591048099104806}
   - component: {fileID: 4902753163408206118}
   - component: {fileID: 371660603348257122}
-  - component: {fileID: 4772143279602307071}
   m_Layer: 9
   m_Name: ArenaUnit
   m_TagString: Untagged
@@ -192,7 +213,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2635964141532697570}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2.1, y: 2.1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -272,28 +293,6 @@ MonoBehaviour:
   normalStrength: 5
   normalSmoothing: 1
   computingNormal: 0
---- !u!95 &4772143279602307071
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2635964141532697570}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: eff136dda25a3584dbd604c896de7e8c, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &3878984232210195795
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,7 +407,7 @@ Transform:
   m_GameObject: {fileID: 5888973871870637870}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.114790045, w: 0.9933898}
-  m_LocalPosition: {x: -0.32952446, y: -0.16238077, z: 0}
+  m_LocalPosition: {x: -0.3295245, y: -0.1623808, z: 0}
   m_LocalScale: {x: 0.47619048, y: 0.47619048, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -457,7 +456,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 5
   m_Sprite: {fileID: 21300010, guid: a1fbd1aaf76d0b94e88551b7c406ee2c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 1
@@ -495,7 +494,7 @@ Transform:
   m_GameObject: {fileID: 9065315040217769481}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.4699998, y: -0.10380972, z: 0}
+  m_LocalPosition: {x: 0.4699998, y: -0.1038097, z: 0}
   m_LocalScale: {x: 0.47619048, y: 0.47619048, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -544,7 +543,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 6
   m_Sprite: {fileID: 21300006, guid: a1fbd1aaf76d0b94e88551b7c406ee2c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

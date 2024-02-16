@@ -66,7 +66,7 @@ public class FeudGameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                CloseArena();
+                ArenaView.Instance.ShowEnd(true);
             }
         }
     }
@@ -218,7 +218,9 @@ public class FeudGameManager : MonoBehaviour
         List<Item> unitsToSpawn = new List<Item>();
         foreach(ItemScriptable scriptable in randomEnemyCombinations[randomIndex].unitsToSpawn)
         {
-            unitsToSpawn.Add(scriptable.item);
+            Item item = new Item();
+            item.SetData(scriptable);
+            unitsToSpawn.Add(item);
         }
         return unitsToSpawn;
     }
@@ -232,7 +234,8 @@ public class FeudGameManager : MonoBehaviour
     public void CloseArena()
     {
         arenaVisible = false;
-        ArenaView.Instance.ClearArena();
+       
+        ArenaView.Instance.HideUI();
         UnitManager.Instance.runningArenaCombat = false;
         SI_CameraController.Instance.HideArena(cityVisible);
     }

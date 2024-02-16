@@ -12,7 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - GLOW_ON
+  - CHANGECOLOR_ON
   - OUTBASE8DIR_ON
   - OUTBASEPIXELPERF_ON
   m_InvalidKeywords: []
@@ -94,8 +94,8 @@ Material:
     - _ClipUvRight: 0
     - _ClipUvUp: 0
     - _ColorChangeLuminosity: 0
-    - _ColorChangeTolerance: 0.25
-    - _ColorChangeTolerance2: 0.25
+    - _ColorChangeTolerance: 0.357
+    - _ColorChangeTolerance2: 0.265
     - _ColorChangeTolerance3: 0.25
     - _ColorRampBlend: 1
     - _ColorRampLuminosity: 0
@@ -103,7 +103,7 @@ Material:
     - _ColorSwapBlend: 1
     - _ColorSwapBlueLuminosity: 0.5
     - _ColorSwapGreenLuminosity: 0.5
-    - _ColorSwapRedLuminosity: 0.55
+    - _ColorSwapRedLuminosity: 0.81
     - _Contrast: 1
     - _CullingOption: 0
     - _DistortAmount: 0.5
@@ -222,15 +222,15 @@ Material:
     m_Colors:
     - _AlphaOutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorChangeNewCol: {r: 0.9716981, g: 0, b: 0.16688643, a: 1}
-    - _ColorChangeNewCol2: {r: 1, g: 1, b: 0, a: 1}
+    - _ColorChangeNewCol: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 1}
+    - _ColorChangeNewCol2: {r: 0.38679248, g: 0.38679248, b: 0.38679248, a: 1}
     - _ColorChangeNewCol3: {r: 1, g: 1, b: 0, a: 1}
-    - _ColorChangeTarget: {r: 0.49411768, g: 0.5882353, b: 0.32941177, a: 1}
-    - _ColorChangeTarget2: {r: 1, g: 0, b: 0, a: 1}
+    - _ColorChangeTarget: {r: 0.41960788, g: 0.69803923, b: 0, a: 1}
+    - _ColorChangeTarget2: {r: 0.19215688, g: 0.5254902, b: 0, a: 1}
     - _ColorChangeTarget3: {r: 1, g: 0, b: 0, a: 1}
     - _ColorSwapBlue: {r: 1, g: 1, b: 1, a: 1}
     - _ColorSwapGreen: {r: 0.05951124, g: 0.046665095, b: 0.03433981, a: 1}
-    - _ColorSwapRed: {r: 1, g: 0.13286836, b: 0, a: 1}
+    - _ColorSwapRed: {r: 0.1470273, g: 0.44520125, b: 0, a: 1}
     - _FadeBurnColor: {r: 1, g: 1, b: 0, a: 1}
     - _GlowColor: {r: 1, g: 1, b: 1, a: 1}
     - _GradBotLeftCol: {r: 0, g: 0, b: 1, a: 1}

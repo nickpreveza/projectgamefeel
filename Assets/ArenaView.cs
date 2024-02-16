@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 public class ArenaView : MonoBehaviour
 {
     public static ArenaView Instance;
@@ -37,15 +39,41 @@ public class ArenaView : MonoBehaviour
     public List<Vector2Int> playerSpawnCoords = new List<Vector2Int>();
     public List<Vector2Int> enemySpawnCoords = new List<Vector2Int>();
 
+    [SerializeField] GameObject endScreen;
+    [SerializeField] TextMeshProUGUI endTitle;
+    [SerializeField] TextMeshProUGUI endSubtitle;
+    [SerializeField] TextMeshProUGUI buttonText;
+    [SerializeField] Button actionButton;
+
     void Awake()
     {
         Instance = this;
     }
 
+    void MakeSureNoArenaLeftoevrs()
+    {
+        foreach(Transform child in tileParent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
     public void GenerateArena(List<Item> _playerUnits, List<Item> _enemyUnits)
     {
-        ClearArena();
+        MakeSureNoArenaLeftoevrs();
 
+        foreach(GameObject obj in activePlayerUnits)
+        {
+            Destroy(obj);
+        }
+
+
+        foreach (GameObject obj in activeEnemyUnits)
+        {
+            Destroy(obj);
+        }
+
+        activePlayerUnits.Clear();
+        activeEnemyUnits.Clear();
         playerUnits = new List<Item>(_playerUnits);
         enemyUnits = new List<Item>(_enemyUnits);
 
@@ -57,7 +85,7 @@ public class ArenaView : MonoBehaviour
             {
                 GameObject newTile = Instantiate(tilePrefab, tileParent);
                 arenaTiles[x, y] = newTile.GetComponent<WorldTile>();
-
+                arenaTiles[x, y].type = TileType.LAND;
                 arenaTiles[x, y].SetDataArena(x, y, cellSize);
                 arenaTiles[x, y].gameObject.transform.position = new Vector3(x, y) * cellSize + offset;
             }
@@ -68,6 +96,24 @@ public class ArenaView : MonoBehaviour
 
         SpawnPlayerUnits();
         SpawnEnemyUnits();
+
+        Invoke("StartFight", 3f);
+    }
+
+    void StartFight()
+    {
+        foreach(GameObject obj in activeEnemyUnits)
+        {
+           // obj.GetComponent<WorldUnit>().lookUp = true;
+        }
+
+        foreach (GameObject obj in activePlayerUnits)
+        {
+          //  obj.GetComponent<WorldUnit>().lookUp = true;
+        }
+
+        //remove this, demo purpouse 
+        FeudGameManager.Instance.arenaOnGoing = false;
     }
 
     void SpawnPlayerUnits()
@@ -106,22 +152,37 @@ public class ArenaView : MonoBehaviour
         }
         GameObject obj = Instantiate(unitPrefab, arenaTiles[spawnCoords.x, spawnCoords.y].transform.position, Quaternion.identity);
         WorldUnit unit = obj.GetComponent<WorldUnit>();
+        unit.playerGroup = isPlayer;
         obj.transform.SetParent(unitParent);
-
+        
         if (isPlayer)
         {
+            unit.SetColors(0);
             activePlayerUnits.Add(obj);
             unit.item = playerUnits[index];
         }
         else
         {
+            unit.SetUnitSpriteColor(Random.ColorHSV());
             activeEnemyUnits.Add(obj);
             unit.item = enemyUnits[index];
         }
 
+        unit.unitIndex = index;
         unit.ArenaSpawn(this, arenaTiles[spawnCoords.x, spawnCoords.y], _item);
     }
 
+    public List<GameObject> GetEnemyGroup(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return activeEnemyUnits;
+        }
+        else
+        {
+            return activePlayerUnits;
+        }
+    }
     public void OnUnitKilled(WorldUnit unit)
     {
         if (unit == null )
@@ -132,35 +193,57 @@ public class ArenaView : MonoBehaviour
 
         if (activePlayerUnits.Contains(unit.gameObject))
         {
-            if (playerUnits.Contains(unit.item))
-            {
-
-            }
+            playerUnits[unit.unitIndex].invalidated = true;
             unit.gameObject.SetActive(false);
+            activeEnemyUnits.Remove(unit.gameObject);
         }
         else if (activeEnemyUnits.Contains(unit.gameObject))
         {
             unit.gameObject.SetActive(false);
+            activeEnemyUnits.Remove(unit.gameObject);
         }
         else
         {
             Debug.LogWarning("Registered unit was not found in eitehlist");
         }
+
+        if (activePlayerUnits.Count == 0)
+        {
+            ShowEnd(false);
+        }
+        else if (activeEnemyUnits.Count == 0)
+        {
+            ShowEnd(true);
+        }
     }
 
-
-    public void ClearArena()
+    public void HideUI()
     {
-        while (tileParent.childCount > 0)
-        {
-            Destroy(tileParent.GetChild(0).gameObject);
-        }
+        endScreen.SetActive(false);
+    }
+    public void ShowEnd(bool isWin)
+    {
+        endScreen.SetActive(true);
 
-        while (unitParent.childCount > 0)
+        if (isWin)
         {
-            Destroy(unitParent.GetChild(0).gameObject);
+            endTitle.text = "YOU WON";
+            endSubtitle.text = "You get to live another day";
+            buttonText.text = "CONTINUE";
+            actionButton.onClick.RemoveAllListeners();
+            actionButton.onClick.AddListener(()=>FeudGameManager.Instance.CloseArena());
+        }
+        else
+        {
+
+            endTitle.text = "YOU LOST";
+            endSubtitle.text = "Your legacy ends here";
+            buttonText.text = "TRY AGAIN?";
+            actionButton.onClick.RemoveAllListeners();
+            actionButton.onClick.AddListener(() => SceneManager.LoadScene(0));
         }
     }
+
 
     public WorldTile GetTile(Vector3 worldPosition)
     {
@@ -344,7 +427,7 @@ public class ArenaView : MonoBehaviour
             {
                 foreach (WorldTile adj in current.adjacentSides)
                 {
-                    if (closedSet.Contains(adj) || adj.type != TileType.LAND)
+                    if (closedSet.Contains(adj) || adj.type != TileType.LAND || adj.occupied)
                     {
                         continue;
                     }

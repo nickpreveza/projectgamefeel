@@ -15,14 +15,15 @@ MonoBehaviour:
   item:
     invalidated: 0
     id: Generic Unit
-    icon: {fileID: 21300012, guid: e8e3b7691aa7ca7458f64e04cb4830bf, type: 3}
+    icon: {fileID: 21300000, guid: e8e3b7691aa7ca7458f64e04cb4830bf, type: 3}
     buyValue: 2
     sellValue: 1
     type: 11
     strRequirment: 1
     conRequirment: 1
     dexRequirment: 1
-    attackSpeed: 1
+    attackSpeed: 3
+    moveSpeed: 3
     damageOrDefense: 1
   weapon: {fileID: 11400000, guid: dc23013340aa67e42a705e9fa31b1cc0, type: 2}
   shield: {fileID: 11400000, guid: 24d47bfd6eb397242aab2b0d9903a381, type: 2}

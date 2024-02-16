@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
+using Unity.VisualScripting;
 using UnityEngine;
 public class WorldUnit : MonoBehaviour
 {
+    public bool lookUp;
     public int posX;
     public int posY;
 
@@ -66,12 +69,31 @@ public class WorldUnit : MonoBehaviour
     public bool hasWeapon;
     public bool hasShield;
 
-    public bool hasTarget;
-    public bool hasBeenTargeted;
-
-    UnitState state = UnitState.IDLE;
+    public bool hasTargetRight;
+    public bool hasTargetLeft;
+    public bool hasBeenTargetedLeft;
+    public bool hasBeenTargetedRight;
+    public bool playerGroup;
+    [SerializeField] UnitState state = UnitState.IDLE;
     bool stateChanged = true;
+    public int unitIndex;
+    [SerializeField] WorldUnit targetUnit;
+    [SerializeField] WorldTile targetTile;
+    [SerializeField] List<WorldTile> pathToTarget = new List<WorldTile>();
+    [SerializeField] bool searchingTarget;
 
+    [SerializeField] WorldUnit leftAttacker;
+    [SerializeField] WorldUnit rightAttacker;
+
+    [SerializeField] int debugOverrideHealth = 20;
+    [SerializeField] float internalAttackTimer;
+
+    [SerializeField] float attacklenghtMultipler = 1f;
+
+
+    float timeElapsedForMove = 0;
+    bool moving;
+    WorldTile prevTile;
     private void Start()
     {
         attackCharges = maxAttackCharges;
@@ -91,6 +113,16 @@ public class WorldUnit : MonoBehaviour
     public void Deselect()
     {
         parentTile.HideHighlight();
+    }
+
+    public void SetColors(int index)
+    {
+        SetUnitSpriteColor(FeudGameManager.Instance.GetCiv(index).mainColor);
+    }
+    public void SetUnitSpriteColor(Color color)
+    {
+        unitSprite.material.SetColor("_ColorChangeNewCol", color);
+        unitSprite.material.SetColor("_ColorChangeNewCol2", color);
     }
 
     public void ValidateActions()
@@ -161,10 +193,6 @@ public class WorldUnit : MonoBehaviour
        
         parentTile = startParent;
 
-       
-
-        //setup stuff
-
         posX = parentTile.posX;
         posY = parentTile.posY;
 
@@ -173,8 +201,8 @@ public class WorldUnit : MonoBehaviour
         attackCharges = maxAttackCharges;
         movePoints = maxMovePoints;
 
-        transform.position = new Vector3(posX, posY, 0);
         oldPosition = newPosition = this.transform.position;
+
         if (item.weapon != null)
         {
             weaponSprite.sprite = item.weapon.icon;
@@ -203,7 +231,7 @@ public class WorldUnit : MonoBehaviour
 
         damage = item.strRequirment;
         //dex speed 
-        health = 5;
+        health = debugOverrideHealth;
         armor = item.conRequirment;
 
         if (hasShield)
@@ -216,13 +244,136 @@ public class WorldUnit : MonoBehaviour
             damage += item.weapon.damageOrDefense;
         }
 
-        StartCoroutine(ArenaBrain());
+        state = UnitState.IDLE;
 
     }
 
-    public IEnumerator ArenaBrain()
+    public void Attack(WorldUnit targetUnit)
     {
-        state = UnitState.IDLE;
+        targetUnit.Damage(damage);
+    }
+
+    public void Damage(int amount)
+    {
+        health -= amount;
+        if (health < 0)
+        {
+            Death();
+        }
+    }
+
+    void Death()
+    {
+        if (hasBeenTargetedLeft)
+        {
+            if (leftAttacker != null)
+            {
+                leftAttacker.hasTargetLeft = false;
+            }
+        }
+
+        if (hasBeenTargetedRight)
+        {
+            if (rightAttacker != null)
+            {
+                rightAttacker.hasTargetRight = false;
+            }
+        }
+
+        if (targetUnit != null)
+        {
+            if (hasTargetLeft)
+            {
+                targetUnit.hasBeenTargetedLeft = false;
+            }
+            else if(hasTargetRight)
+            {
+                targetUnit.hasBeenTargetedRight = false;
+            }
+        }
+        arenaHandler.OnUnitKilled(this);
+    }
+
+    void FindTarget()
+    {
+        List<GameObject> enemyGroup = arenaHandler.GetEnemyGroup(playerGroup);
+
+        foreach (GameObject enemy in enemyGroup)
+        {
+            WorldUnit enemyUnitData = enemy.GetComponent<WorldUnit>();
+            if (enemyUnitData != null)
+            {
+                if (enemyUnitData.hasBeenTargetedLeft && enemyUnitData.hasBeenTargetedRight)
+                {
+                    continue;
+                }
+
+                if (!enemyUnitData.hasBeenTargetedLeft)
+                {
+                    List<WorldTile> _pathToTarget = arenaHandler.FindPath(this.parentTile, arenaHandler.arenaTiles[enemyUnitData.posX - 1, enemyUnitData.posY], false);
+
+                    if (_pathToTarget != null)
+                    {
+                        pathToTarget = _pathToTarget;
+                        targetTile = arenaHandler.arenaTiles[enemyUnitData.posX - 1, enemyUnitData.posY];
+                        hasTargetLeft = true;
+
+                        targetUnit = enemyUnitData;
+                        targetUnit.hasBeenTargetedLeft = true;
+                        targetUnit.leftAttacker = this;
+           
+                        searchingTarget = false;
+
+                        targetUnit.targetUnit = this;
+                        break;
+                    }
+                }
+
+                if (!enemyUnitData.hasBeenTargetedRight)
+                {
+                    List<WorldTile> _pathToTarget = arenaHandler.FindPath(this.parentTile, arenaHandler.arenaTiles[enemyUnitData.posX + 1, enemyUnitData.posY], false);
+
+                    if (_pathToTarget != null)
+                    {
+                        pathToTarget = _pathToTarget;
+                        targetTile = arenaHandler.arenaTiles[enemyUnitData.posX + 1, enemyUnitData.posY];
+                        hasTargetRight = true;
+                      
+                        targetUnit = enemyUnitData;
+                        targetUnit.hasBeenTargetedRight = true;
+                        targetUnit.rightAttacker = this;
+                        searchingTarget = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        searchingTarget = false;
+    }
+
+    void InvalidateTarget()
+    {
+        hasTargetLeft = false;
+        hasTargetLeft = false;
+        targetUnit = null;
+        targetTile = null;
+        pathToTarget = null;
+    }
+
+    private void Update()
+    {
+        
+        if (!lookUp)
+        {
+            return;
+        }
+
+        internalAttackTimer += Time.deltaTime * attacklenghtMultipler;
 
         switch (state)
         {
@@ -230,43 +381,247 @@ public class WorldUnit : MonoBehaviour
                 //if no target in range, idle, and search
                 if (stateChanged)
                 {
-                    animator.SetBool("ATTACKING", false);
-                    animator.SetBool("IDLE", true);
+                    animator.SetTrigger("Idle");
                     stateChanged = false;
-                   
                 }
 
-                if (hasTarget)
+                if (targetUnit != null)
                 {
-                    state = UnitState.WALKINGTOWARDS;
-                    stateChanged = true;
-                    StartCoroutine(ArenaBrain());
+                    List<WorldTile> newPath = new List<WorldTile>();
+                    if (hasTargetLeft)
+                    {
+                        newPath = arenaHandler.FindPath(this.parentTile, arenaHandler.arenaTiles[targetUnit.parentTile.posX - 1, targetUnit.parentTile.posY], false);
+                        if (newPath != null)
+                        {
+                            pathToTarget = newPath;
+                            targetTile = arenaHandler.arenaTiles[targetUnit.posX - 1, targetUnit.posY];
+                        }
+                        else
+                        {
+                            state = UnitState.IDLE;
+                            stateChanged = true;
+                            InvalidateTarget();
+                            break;
+                        }
+                    }
+                    else if (hasTargetRight)
+                    {
+                        newPath = arenaHandler.FindPath(this.parentTile, targetTile, false);
+
+                        if (newPath != null)
+                        {
+                            pathToTarget = newPath;
+                            targetTile = arenaHandler.arenaTiles[targetUnit.posX + 1, targetUnit.posY];
+                        }
+                        else
+                        {
+                            state = UnitState.IDLE;
+                            stateChanged = true;
+                            InvalidateTarget();
+                            break;
+                        }
+                    }
+
+                    //somewhere here to a validation of the enemy unit 
+                    if (newPath != null)
+                    {
+                        pathToTarget = newPath;
+                    }
+                    else
+                    {
+                        state = UnitState.IDLE;
+                        stateChanged = true;
+                        break;
+                    }
+                }
+
+                if (!hasTargetLeft && !hasTargetRight && !searchingTarget)
+                {
+                    searchingTarget = true;
+                    FindTarget();
+                    break;
+                }
+
+                if (hasTargetLeft || hasTargetRight)
+                {
+                    if (!searchingTarget && pathToTarget != null && pathToTarget.Count > 0)
+                    {
+                        state = UnitState.WALKINGTOWARDS;
+                        stateChanged = true;
+                    }
+                    else
+                    {
+                        hasTargetLeft = false;
+                        hasTargetRight = false;
+      
+                    }
                 }
                 break;
             case UnitState.ATTACKING:
 
                 if (stateChanged)
                 {
-                    animator.SetBool("IDLE", false);
-                    animator.SetBool("ATTACKING", true);
+                   
                     stateChanged = false;
-
                 }
 
-
-                if (!hasTarget)
+                if (!hasTargetLeft && !hasTargetRight)
                 {
                     state = UnitState.IDLE;
                     stateChanged = true;
-                    StartCoroutine(ArenaBrain());
+                    break;
+                }
+
+                if (targetUnit == null || targetUnit.item.invalidated || !targetUnit.gameObject.activeSelf)
+                {
+                    InvalidateTarget();
+                    state = UnitState.IDLE;
+                    stateChanged = true;
+                    break;
+                }
+
+                if (hasTargetLeft)
+                {
+                    if (targetUnit.parentTile.posX != parentTile.posX + 1)
+                    {
+                        state = UnitState.IDLE;
+                        stateChanged = true;
+                        InvalidateTarget();
+                        break;
+                    }
+                }
+
+                if (hasTargetRight)
+                {
+                    if (targetUnit.parentTile.posX != parentTile.posX - 1)
+                    {
+                        state = UnitState.IDLE;
+                        stateChanged = true;
+                        InvalidateTarget();
+                        break;
+                    }
+                }
+
+                if (internalAttackTimer > attackSpeed)
+                {
+                    Attack(targetUnit);
+                    animator.SetTrigger("Attacking");
+                    internalAttackTimer = 0;
                 }
                 //if target is dead and stop and switch to searching
                 break;
             case UnitState.WALKINGTOWARDS:
-                //if target is next tile then stop and switch to attacking
+             
+                if (moving)
+                {
+                    if (timeElapsedForMove < moveSpeed)
+                    {
+                        transform.position = Vector3.Lerp(arenaHandler.arenaTiles[prevTile.posX, prevTile.posY].transform.position,
+                                                              arenaHandler.arenaTiles[parentTile.posX, parentTile.posY].transform.position, (timeElapsedForMove / moveSpeed));
+
+                        timeElapsedForMove += Time.deltaTime;
+                    }
+                    else
+                    {
+                        transform.position = arenaHandler.arenaTiles[parentTile.posX, parentTile.posY].transform.position;
+                        timeElapsedForMove = 0;
+                        moving = false;
+
+                        List<WorldTile> newPath = new List<WorldTile>();
+                        if (hasTargetLeft)
+                        {
+                            newPath = arenaHandler.FindPath(this.parentTile, arenaHandler.arenaTiles[targetUnit.parentTile.posX-1, targetUnit.parentTile.posY] , false);
+                            if (newPath != null)
+                            {
+                                pathToTarget = newPath;
+                                targetTile = arenaHandler.arenaTiles[targetUnit.posX - 1, targetUnit.posY];
+                            }
+                            else
+                            {
+                                state = UnitState.IDLE;
+                                stateChanged = true;
+                                InvalidateTarget();
+                                break;
+                            }
+                        }
+                        else if (hasTargetRight)
+                        {
+                            newPath = arenaHandler.FindPath(this.parentTile, targetTile, false);
+
+                            if (newPath != null)
+                            {
+                                pathToTarget = newPath;
+                                targetTile = arenaHandler.arenaTiles[targetUnit.posX + 1, targetUnit.posY];
+                            }
+                            else
+                            {
+                                state = UnitState.IDLE;
+                                stateChanged = true;
+                                InvalidateTarget();
+                                break;
+                            }
+                        }
+                       
+                        //somewhere here to a validation of the enemy unit 
+                        if (newPath != null)
+                        {
+                            pathToTarget = newPath;
+                        }
+                        else
+                        {
+                            state = UnitState.IDLE;
+                            stateChanged = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    timeElapsedForMove = 0;
+                    if (!hasTargetLeft && !hasTargetRight)
+                    {
+                        state = UnitState.IDLE;
+                        stateChanged = true;
+                        break;
+                    }
+
+                    if (pathToTarget == null || pathToTarget.Count == 0)
+                    {
+                        state = UnitState.IDLE;
+                        stateChanged = true;
+                        break;
+                    }
+
+                    if (parentTile == targetTile)
+                    {
+                        state = UnitState.ATTACKING;
+                        stateChanged = true;
+                        moving = false;
+                        pathToTarget.Clear();
+                        break;
+                    }
+
+                    WorldTile pathStep = pathToTarget[0];
+
+                    if (pathStep == parentTile)
+                    {
+                        pathToTarget.RemoveAt(0);
+                        break;
+                    }
+
+                    parentTile.UnitOut();
+                    prevTile = parentTile;
+                    parentTile = pathStep;
+                    parentTile.UnitIn(this);
+                    posX = parentTile.posX;
+                    posY = parentTile.posY;
+
+                    pathToTarget.RemoveAt(0);
+                    moving = true;
+
+                }
                 break;
         }
-        yield return new WaitForEndOfFrame();
     }
 
     public void SpawnSetup(WorldTile startParent)
@@ -289,9 +644,11 @@ public class WorldUnit : MonoBehaviour
         //color time here 
         UnitManager.Instance.ClearTileSelectMode();
         UnitManager.Instance.SelectUnit(this);
+
     }
 }
 
+[System.Serializable]
 public enum UnitState
 {
     IDLE,

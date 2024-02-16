@@ -327,6 +327,7 @@ public class CityView : MonoBehaviour
         subPanelOpen = false;
         tradingOpen = false;
         challengingOpen = false;
+        FeudGameManager.Instance.cityVisible = false;
         cityParent.SetActive(false);
     }
 
